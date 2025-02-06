@@ -31,6 +31,15 @@ func WithMiddleware(mw ...Middleware) ssh.Option {
 
 func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		go func() {
+			// The context is canceled when the client's connection closes or I/ O operation fails.
+			<-s.Context().Done()
+			cancel()
+		}()
+
 		str := s.Command()
 		if len(str) == 0 {
 			logrus.Warn("SSH Client give empty command")
@@ -53,15 +62,15 @@ func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 				Session: s,
 			}
 
-			if err = ffmpegInstaller.Download(); err != nil {
-				sio.Fatalln(s, "Download ffmpeg error: %s", err.Error())
+			if err = ffmpegInstaller.Download(ctx); err != nil {
+				sio.Fatalf(s, "Download ffmpeg error: %s\n", err.Error())
 			}
 
-			if err = ffmpegInstaller.Unpack(); err != nil {
+			if err = ffmpegInstaller.Unpack(ctx); err != nil {
 				sio.Fatalln(s, "Unpack ffmpeg error: %s", err.Error())
 			}
 
-			if err = ffmpegInstaller.Setup(); err != nil {
+			if err = ffmpegInstaller.Setup(ctx); err != nil {
 				sio.Fatalln(s, "Setup ffmpeg error: %s", err.Error())
 			}
 		} else {

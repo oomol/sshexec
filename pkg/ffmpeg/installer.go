@@ -14,33 +14,32 @@ import (
 
 // Installer is an interface that defines the methods to download, unpack and setup ffmpeg binaries
 type Installer struct {
-	// URL: https://github.com/oomol/builded/releases/download
-	URL string // URL to download ffmpeg binaries
-	// PREFIX: ~/.oomol-studio/host-shared/<package_name>
+	URL     string
 	PREFIX  string
 	Session ssh.Session
 }
 
-func (i Installer) Download() error {
+func (i Installer) Download(ctx context.Context) error {
 	sio.Printf(i.Session, "Downloading ffmpeg binaries from %q\n", i.URL)
 	pGet := pget.New()
-	err := pGet.Run(context.Background(), "1.0", []string{
+	if err := pGet.Run(ctx, "1.0", []string{
 		"-p", "4",
 		"-o", filepath.Join(os.TempDir(), "ffmpeg.tar.xz"),
 		define.FFReleaseURL,
-	})
-	if err != nil {
+	}); err != nil {
 		return fmt.Errorf("download ffmpeg failed: %v", err)
 	}
-	return nil
 
-}
+	// TODO Checksum of the downloaded file
 
-func (i Installer) Unpack() error {
 	return nil
 }
 
-func (i Installer) Setup() error {
+func (i Installer) Unpack(ctx context.Context) error {
+	return nil
+}
+
+func (i Installer) Setup(ctx context.Context) error {
 	return nil
 }
 
