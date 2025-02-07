@@ -67,11 +67,11 @@ func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 			}
 
 			if err = ffmpegInstaller.Unpack(ctx); err != nil {
-				sio.Fatalln(s, "Unpack ffmpeg error: %s", err.Error())
+				sio.Fatalf(s, "Unpack ffmpeg error: %s\n", err.Error())
 			}
 
 			if err = ffmpegInstaller.Setup(ctx); err != nil {
-				sio.Fatalln(s, "Setup ffmpeg error: %s", err.Error())
+				sio.Fatalf(s, "Setup ffmpeg error: %s\n", err.Error())
 			}
 		} else {
 			next(s)

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"sshd/pkg/define"
+	"sshd/pkg/hash"
 	"sshd/pkg/sio"
 )
 
@@ -21,21 +22,26 @@ type Installer struct {
 
 func (i Installer) Download(ctx context.Context) error {
 	sio.Printf(i.Session, "Downloading ffmpeg binaries from %q\n", i.URL)
+	filePath := os.TempDir() + "ffmpeg.tar.xz"
 	pGet := pget.New()
 	if err := pGet.Run(ctx, "1.0", []string{
 		"-p", "4",
-		"-o", filepath.Join(os.TempDir(), "ffmpeg.tar.xz"),
+		"-o", filePath,
 		define.FFReleaseURL,
 	}); err != nil {
 		return fmt.Errorf("download ffmpeg failed: %v", err)
 	}
 
-	// TODO Checksum of the downloaded file
-
+	err := hash.CmpFileChecksum(filePath, define.FFMSha256)
+	if err != nil {
+		return fmt.Errorf("checksum failed: %v", err)
+	}
+	sio.Println(i.Session, "Download successful")
 	return nil
 }
 
 func (i Installer) Unpack(ctx context.Context) error {
+	
 	return nil
 }
 
