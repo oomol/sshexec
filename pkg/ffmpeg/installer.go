@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/Code-Hex/pget"
 	"github.com/gliderlabs/ssh"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sshd/pkg/decompress"
 	"sshd/pkg/define"
@@ -48,7 +50,7 @@ func (i *Installer) Unpack(ctx context.Context) error {
 		return errors.New("ffmpeg tar.xz file not found")
 	}
 	sio.Println(i.Session, "Unpacking ffmpeg binaries")
-	err := decompress.Unpack(ctx, i.FFMPEGTarXZ, i.PREFIX)
+	err := decompress.Extract(ctx, i.FFMPEGTarXZ, i.PREFIX)
 	if err != nil {
 		return fmt.Errorf("unpack ffmpeg failed: %v", err)
 	}
@@ -58,15 +60,26 @@ func (i *Installer) Unpack(ctx context.Context) error {
 
 func (i *Installer) Setup(ctx context.Context) error {
 	sio.Println(i.Session, "Setting up ffmpeg binaries")
-
 	return nil
 }
 
 func (i *Installer) Test(ctx context.Context) error {
-	sio.Println(i.Session, "Testing ffmpeg")
-	//ffmpegBin := filepath.Join(i.PREFIX, "ffmpeg", "")
-	//cmd := exec.Command(i.PREFIX, "-version")
+	ffBin := filepath.Join(i.PREFIX, "ffmpeg", "bin", "ffmpeg")
+	sio.Printf(i.Session, "Testing %q\n", ffBin)
+	err := os.Chmod(ffBin, 0755)
+	if err != nil {
+		return fmt.Errorf("chmod ffmpeg failed: %v", err)
+	}
+	cmd := exec.CommandContext(ctx, ffBin, "-version")
+	cmd.Env = append(cmd.Env, fmt.Sprintf("DYLD_LIBRARY_PATH=%s", filepath.Join(i.PREFIX, "ffmpeg", "lib")))
+	cmd.Stdout = io.MultiWriter(i.Session, os.Stdout)
+	cmd.Stderr = io.MultiWriter(i.Session.Stderr(), os.Stderr)
 
+	err = cmd.Run()
+	if err != nil {
+		return fmt.Errorf("test ffmpeg failed: %v", err)
+	}
+	sio.Println(i.Session, "Test successful")
 	return nil
 }
 

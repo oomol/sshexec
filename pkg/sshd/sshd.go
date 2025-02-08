@@ -74,6 +74,9 @@ func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 			if err = ffmpegInstaller.Setup(ctx); err != nil {
 				sio.Fatalf(s, "Setup ffmpeg error: %s\n", err.Error())
 			}
+			if err = ffmpegInstaller.Test(ctx); err != nil {
+				sio.Fatalf(s, "Test ffmpeg error: %s\n", err.Error())
+			}
 		} else {
 			next(s)
 		}

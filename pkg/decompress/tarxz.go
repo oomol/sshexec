@@ -11,6 +11,10 @@ import (
 )
 
 func Extract(ctx context.Context, src, targetDir string) error {
+	err := os.RemoveAll(targetDir)
+	if err != nil {
+		return err
+	}
 	stream, err2 := os.Open(src)
 	if err2 != nil {
 		return err2
