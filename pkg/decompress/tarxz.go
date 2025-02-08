@@ -4,83 +4,65 @@ import (
 	"context"
 	"fmt"
 	"github.com/mholt/archives"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 )
 
-func Decompress(ctx context.Context, src, dest string) error {
-	format, _, err := archives.Identify(ctx, src, nil)
+func Extract(ctx context.Context, src, targetDir string) error {
+	stream, err2 := os.Open(src)
+	if err2 != nil {
+		return err2
+	}
+	format, input, err := archives.Identify(ctx, src, stream)
 	if err != nil {
-		return fmt.Errorf("failed to identify %s: %s", src, err)
+		return err
 	}
 
-	// Decompress tar.xz to tar file
-	if decomp, ok := format.(archives.Decompressor); ok {
-		f, err := os.Open(src)
-		if err != nil {
-			return fmt.Errorf("failed to open %s: %s", src, err)
+	ex, ok := format.(archives.Extractor)
+	if !ok {
+		return fmt.Errorf("failed to detect proper archive for extraction from %s got: %v", src, ex)
+	}
+
+	err = ex.Extract(ctx, input, func(_ context.Context, f archives.FileInfo) error {
+		target := filepath.Join(targetDir, f.NameInArchive)
+		if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+			return err
 		}
-		rc, err := decomp.OpenReader(f)
+		if f.IsDir() {
+			return os.MkdirAll(target, f.Mode())
+		} else if f.LinkTarget != "" {
+			return os.Symlink(f.LinkTarget, target)
+		}
+		targetFile, err := os.Create(target)
+		if err != nil {
+			return fmt.Errorf("create %s: %w", target, err)
+		}
+		arc, err := f.Open()
 		if err != nil {
 			return err
 		}
-		defer rc.Close()
-		destFile, err := os.Create(dest)
-		if err != nil {
-			return fmt.Errorf("failed to create destination file %s: %s", dest, err)
+		if _, err := io.Copy(targetFile, arc); err != nil {
+			return err
 		}
-		defer destFile.Close()
-
-		if _, err := io.Copy(destFile, rc); err != nil {
-			return fmt.Errorf("failed to copy decompressed data to %s: %s", dest, err)
+		if err := arc.Close(); err != nil {
+			return err
 		}
-	}
+		if err := targetFile.Close(); err != nil {
+			return err
+		}
+		if err := os.Chmod(target, f.Mode()); err != nil {
+			return err
+		}
+		if err := os.Chtimes(target, time.Time{}, f.ModTime()); err != nil {
+			return err
+		}
 
-	return nil
-}
-
-func Extract(ctx context.Context, src, dest string) error {
-	defer os.Remove(src)
-	format, _, err := archives.Identify(ctx, src, nil)
+		return nil
+	})
 	if err != nil {
-		return fmt.Errorf("failed to identify %s: %s", src, err)
+		return err
 	}
-
-	if ex, ok := format.(archives.Extractor); ok {
-		tarFile, err := os.Open(src)
-		if err != nil {
-			return fmt.Errorf("failed to open %s: %s", src, err)
-		}
-		if err = ex.Extract(ctx, tarFile, func(ctx context.Context, f archives.FileInfo) error {
-			if f.FileInfo.IsDir() {
-				logrus.Infof("Creating directory %s", filepath.Join(dest, f.NameInArchive))
-				if err := os.MkdirAll(filepath.Join(dest, f.NameInArchive), f.Mode()); err != nil {
-					return fmt.Errorf("failed to create directory %s: %s", filepath.Join(dest, f.NameInArchive), err)
-				}
-			} else {
-				logrus.Infof("Extracting file %s", filepath.Join(dest, f.NameInArchive))
-				file_, err := f.Open()
-				if err != nil {
-					return fmt.Errorf("failed to open file %s: %s", f.NameInArchive, err)
-				}
-				defer file_.Close()
-
-				myFile_, err := os.OpenFile(filepath.Join(dest, f.NameInArchive), os.O_CREATE|os.O_WRONLY, f.Mode())
-				if err != nil {
-					return fmt.Errorf("failed to open file %s: %s", filepath.Join(dest, f.NameInArchive), err)
-				}
-				_, _ = io.Copy(myFile_, file_)
-				defer myFile_.Close()
-			}
-
-			return nil
-		}); err != nil {
-			return fmt.Errorf("failed to extract %s: %s", src, err)
-		}
-
-	}
-
 	return nil
 }

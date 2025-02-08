@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"os/exec"
+	"path/filepath"
 	"sshd/pkg/define"
 	"sshd/pkg/ffmpeg"
 	"sshd/pkg/sio"
@@ -50,14 +51,14 @@ func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 		if str[0] == define.InstallFFMPEG {
 			sio.Println(s, "Try to install ffmpeg")
 
-			d, err := ffmpeg.GetStudioHomeDir()
+			stduioHome, err := ffmpeg.GetStudioHomeDir()
 			if err != nil {
 				sio.Fatalf(s, "GetStudioHomeDir error: %s \n", err.Error())
 			}
 
-			sio.Printf(s, "GetStudioHomeDir: %q \n", d)
+			sio.Printf(s, "GetStudioHomeDir: %q \n", stduioHome)
 			ffmpegInstaller := ffmpeg.Installer{
-				PREFIX:  d,
+				PREFIX:  filepath.Join(stduioHome, "host-shared"),
 				URL:     define.FFReleaseURL,
 				Session: s,
 			}
