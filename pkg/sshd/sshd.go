@@ -129,32 +129,22 @@ func ExecCmd(next ssh.Handler) ssh.Handler {
 		}()
 
 		str := s.Command()
-		if len(str) == 0 {
-			logrus.Warn("Empty command")
-			_ = s.Exit(128)
-			return
-		}
-
 		logrus.Infof("Command: %q", str)
 		cmd := exec.CommandContext(ctx, str[0], str[1:]...)
+
 		stdOut, err := cmd.StdoutPipe()
 		if err != nil {
-			logrus.Errorf("cmd.StdoutPipe() error: %s", err)
-			_ = s.Exit(100)
-			return
+			sio.Fatalf(s, "cmd.StdoutPipe() error: %s", err)
 		}
 
 		stdErr, err := cmd.StderrPipe()
 		if err != nil {
-			logrus.Errorf("cmd.StderrPipe() error: %s", err)
-			_ = s.Exit(100)
-			return
+			sio.Fatalf(s, "cmd.StderrPipe() error: %s", err)
 		}
 
-		err = cmd.Start()
+		stdIn, err := cmd.StdinPipe()
 		if err != nil {
-			logrus.Errorf("cmd.Start() error: %s", err)
-			_ = s.Exit(127) //nolint:mnd
+			sio.Fatalf(s, "cmd.StdinPipe() error: %s", err)
 		}
 
 		// Copy cmd stdout to ssh session
@@ -167,11 +157,18 @@ func ExecCmd(next ssh.Handler) ssh.Handler {
 			_, _ = io.Copy(s.Stderr(), stdErr)
 		}()
 
+		// Copy stdin from session to cmd stdin
+		go func() {
+			_, _ = io.Copy(stdIn, s)
+		}()
+
+		err = cmd.Start()
+		if err != nil {
+			sio.Fatalf(s, "cmd.Start() error: %v", err.Error())
+		}
+
 		if err = cmd.Wait(); err != nil {
-			_ = s.Exit(cmd.ProcessState.ExitCode())
-			logrus.Errorf("cmd.Wait() error: %s", err)
-		} else {
-			logrus.Infof("Command %q finished", str)
+			sio.Fatalf(s, "cmd.Wait() error: %v", err.Error())
 		}
 		next(s)
 	}
@@ -198,7 +195,7 @@ func SSHExec() error {
 	addr := define.Addr + ":" + define.Port
 	logrus.Infof("Starting SSH server at %s", addr)
 	return ssh.ListenAndServe(addr, nil, WithMiddleware(
-		//ExecCmd,
+		ExecCmd,
 		RunFFMPEG,
 		InstallFFMPEG,
 		Sanitizers,
