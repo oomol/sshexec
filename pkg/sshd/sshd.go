@@ -32,64 +32,56 @@ func WithMiddleware(mw ...Middleware) ssh.Option {
 
 func RunFFMPEG(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+		if s.Command()[0] == define.FFMPEG || s.Command()[0] == define.FFPROBE {
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
 
-		go func() {
-			// The context is canceled when the client's connection closes or I/ O operation fails.
-			<-s.Context().Done()
-			cancel()
-		}()
+			go func() {
+				// The context is canceled when the client's connection closes or I/ O operation fails.
+				<-s.Context().Done()
+				cancel()
+			}()
 
-		str := s.Command()
-		if len(str) == 0 {
-			logrus.Warn("SSH Client give empty command")
-			sio.Fatalln(s, "Empty command")
-		}
-		if str[0] != define.FFMPEG {
-			return
-		}
+			studioHome, err := ffmpeg.GetStudioHomeDir()
+			if err != nil {
+				sio.Fatalf(s, "GetStudioHomeDir error: %s\n", err.Error())
+			}
+			// ffmpeg or ffprobe
+			ffBin := filepath.Join(studioHome, "host-shared", "ffmpeg", "bin", s.Command()[0])
 
-		studioHome, err := ffmpeg.GetStudioHomeDir()
-		if err != nil {
-			sio.Fatalf(s, "GetStudioHomeDir error: %s\n", err.Error())
-		}
-		env := define.DYLD_LIBRARY_PATH + "=" + filepath.Join(studioHome, "host-shared", "ffmpeg", "lib")
-		ffBin := filepath.Join(studioHome, "host-shared", "ffmpeg", "bin", "ffmpeg")
-		ffmpegELF := ffmpeg.Runner{
-			File:    ffBin,   // ffmpeg
-			Args:    str[1:], // Pass the rest of the command to ffmpeg
-			Envs:    []string{env},
-			Session: s,
-		}
-		err = ffmpegELF.Run(ctx)
-		if err != nil {
-			return
-		}
+			env := define.DYLD_LIBRARY_PATH + "=" + filepath.Join(studioHome, "host-shared", "ffmpeg", "lib")
 
-		next(s)
+			ffmpegELF := ffmpeg.Runner{
+				File:    ffBin,           // ffmpeg
+				Args:    s.Command()[1:], // Pass the rest of the command to ffmpeg
+				Envs:    []string{env},
+				Session: s,
+			}
+
+			logrus.Infof("Run ffmpeg: %q with args %q with env %q", ffmpegELF.File, ffmpegELF.Args, ffmpegELF.Envs)
+			if err = ffmpegELF.Run(ctx); err != nil {
+				sio.Fatalf(s, "Run ffmpeg error: %s\n", err.Error())
+			}
+		} else {
+			next(s)
+		}
 	}
 }
 
 func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+		if s.Command()[0] == define.InstallFFMPEG {
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
 
-		go func() {
-			// The context is canceled when the client's connection closes or I/ O operation fails.
-			<-s.Context().Done()
-			cancel()
-		}()
+			go func() {
+				// The context is canceled when the client's connection closes or I/ O operation fails.
+				<-s.Context().Done()
+				cancel()
+			}()
 
-		str := s.Command()
-		if len(str) == 0 {
-			logrus.Warn("SSH Client give empty command")
-			sio.Fatalln(s, "Empty command")
-		}
+			// If given command is define.InstallFFMPEG, try to install ffmpeg
 
-		// If given command is define.InstallFFMPEG, try to install ffmpeg
-		if str[0] == define.InstallFFMPEG {
 			sio.Println(s, "Try to install ffmpeg")
 
 			stduioHome, err := ffmpeg.GetStudioHomeDir()
@@ -197,7 +189,7 @@ func Sanitizers(next ssh.Handler) ssh.Handler {
 		if define.IsWhitelisted(str[0]) {
 			next(s)
 		} else {
-			sio.Fatalf(s, "Command not allowed, Support commands: %q\n", define.Whitelist)
+			sio.Fatalf(s, "Command %q not allowed, Support commands: %q\n", str[0], define.Whitelist)
 		}
 	}
 }

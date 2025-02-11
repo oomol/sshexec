@@ -14,13 +14,17 @@ type Runner struct {
 }
 
 func (r *Runner) Run(ctx context.Context) error {
-	return RunningELF(ctx, r.File, r.Args, r.Envs, r.Session)
-}
+	cmd := exec.CommandContext(ctx, r.File, r.Args...)
+	cmd.Env = append(cmd.Env, r.Envs...)
+	cmd.Stdout = r.Session
+	cmd.Stderr = r.Session.Stderr()
+	if err := cmd.Start(); err != nil {
+		return err
+	}
 
-func RunningELF(ctx context.Context, elf string, args, envs []string, session ssh.Session) error {
-	cmd := exec.CommandContext(ctx, elf, args...)
-	cmd.Env = append(cmd.Env, envs...)
-	cmd.Stdout = session
-	cmd.Stderr = session.Stderr()
-	return cmd.Run()
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
+
+	return nil
 }

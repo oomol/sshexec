@@ -3,6 +3,7 @@ package define
 var Whitelist = []string{
 	FFMPEG,
 	InstallFFMPEG,
+	FFPROBE,
 }
 
 func IsWhitelisted(command string) bool {
