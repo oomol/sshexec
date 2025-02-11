@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/gliderlabs/ssh"
 	"github.com/sirupsen/logrus"
-	"io"
-	"os/exec"
 	"path/filepath"
 	"sshd/pkg/define"
 	"sshd/pkg/ffmpeg"
@@ -48,19 +46,18 @@ func RunFFMPEG(next ssh.Handler) ssh.Handler {
 			}
 			// ffmpeg or ffprobe
 			ffBin := filepath.Join(studioHome, "host-shared", "ffmpeg", "bin", s.Command()[0])
-
 			env := define.DYLD_LIBRARY_PATH + "=" + filepath.Join(studioHome, "host-shared", "ffmpeg", "lib")
 
-			ffmpegELF := ffmpeg.Runner{
-				File:    ffBin,           // ffmpeg
+			runner := ffmpeg.Runner{
+				File:    ffBin,           // ffmpeg/ffprobe is the target binary
 				Args:    s.Command()[1:], // Pass the rest of the command to ffmpeg
 				Envs:    []string{env},
 				Session: s,
 			}
 
-			logrus.Infof("Run ffmpeg: %q with args %q with env %q", ffmpegELF.File, ffmpegELF.Args, ffmpegELF.Envs)
-			if err = ffmpegELF.Run(ctx); err != nil {
-				sio.Fatalf(s, "Run ffmpeg error: %s\n", err.Error())
+			logrus.Infof("Run ffmpeg: %q with args %q with env %q", runner.File, runner.Args, runner.Envs)
+			if err = runner.Run(ctx); err != nil {
+				logrus.Errorf("Run cmd error: %s", err.Error())
 			}
 		} else {
 			next(s)
@@ -116,63 +113,9 @@ func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 	}
 }
 
-func ExecCmd(next ssh.Handler) ssh.Handler {
-	return func(s ssh.Session) {
-		logrus.Info("ExecCmd Middleware")
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
-		go func() {
-			// The context is canceled when the client's connection closes or I/ O operation fails.
-			<-s.Context().Done()
-			cancel()
-		}()
-
-		str := s.Command()
-		logrus.Infof("Command: %q", str)
-		cmd := exec.CommandContext(ctx, str[0], str[1:]...)
-
-		stdOut, err := cmd.StdoutPipe()
-		if err != nil {
-			sio.Fatalf(s, "cmd.StdoutPipe() error: %s", err)
-		}
-
-		stdErr, err := cmd.StderrPipe()
-		if err != nil {
-			sio.Fatalf(s, "cmd.StderrPipe() error: %s", err)
-		}
-
-		stdIn, err := cmd.StdinPipe()
-		if err != nil {
-			sio.Fatalf(s, "cmd.StdinPipe() error: %s", err)
-		}
-
-		// Copy cmd stdout to ssh session
-		go func() {
-			_, _ = io.Copy(s, stdOut)
-		}()
-
-		// Copy cmd stderr to ssh session's stderr
-		go func() {
-			_, _ = io.Copy(s.Stderr(), stdErr)
-		}()
-
-		// Copy stdin from session to cmd stdin
-		go func() {
-			_, _ = io.Copy(stdIn, s)
-		}()
-
-		err = cmd.Start()
-		if err != nil {
-			sio.Fatalf(s, "cmd.Start() error: %v", err.Error())
-		}
-
-		if err = cmd.Wait(); err != nil {
-			sio.Fatalf(s, "cmd.Wait() error: %v", err.Error())
-		}
-		next(s)
-	}
-}
+//func ExecCmd(next ssh.Handler) ssh.Handler {
+//	return handler.ExecHandler()
+//}
 
 func Sanitizers(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
@@ -195,7 +138,7 @@ func SSHExec() error {
 	addr := define.Addr + ":" + define.Port
 	logrus.Infof("Starting SSH server at %s", addr)
 	return ssh.ListenAndServe(addr, nil, WithMiddleware(
-		ExecCmd,
+		//ExecCmd,
 		RunFFMPEG,
 		InstallFFMPEG,
 		Sanitizers,

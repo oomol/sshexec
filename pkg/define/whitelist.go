@@ -4,7 +4,6 @@ var Whitelist = []string{
 	FFMPEG,
 	InstallFFMPEG,
 	FFPROBE,
-	"bash",
 }
 
 func IsWhitelisted(command string) bool {
