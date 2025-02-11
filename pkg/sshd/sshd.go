@@ -30,6 +30,47 @@ func WithMiddleware(mw ...Middleware) ssh.Option {
 	}
 }
 
+func RunFFMPEG(next ssh.Handler) ssh.Handler {
+	return func(s ssh.Session) {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		go func() {
+			// The context is canceled when the client's connection closes or I/ O operation fails.
+			<-s.Context().Done()
+			cancel()
+		}()
+
+		str := s.Command()
+		if len(str) == 0 {
+			logrus.Warn("SSH Client give empty command")
+			sio.Fatalln(s, "Empty command")
+		}
+		if str[0] != define.FFMPEG {
+			return
+		}
+
+		studioHome, err := ffmpeg.GetStudioHomeDir()
+		if err != nil {
+			sio.Fatalf(s, "GetStudioHomeDir error: %s\n", err.Error())
+		}
+		env := define.DYLD_LIBRARY_PATH + "=" + filepath.Join(studioHome, "host-shared", "ffmpeg", "lib")
+		ffBin := filepath.Join(studioHome, "host-shared", "ffmpeg", "bin", "ffmpeg")
+		ffmpegELF := ffmpeg.Runner{
+			File:    ffBin,   // ffmpeg
+			Args:    str[1:], // Pass the rest of the command to ffmpeg
+			Envs:    []string{env},
+			Session: s,
+		}
+		err = ffmpegELF.Run(ctx)
+		if err != nil {
+			return
+		}
+
+		next(s)
+	}
+}
+
 func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
 		ctx, cancel := context.WithCancel(context.Background())
@@ -80,12 +121,6 @@ func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 		} else {
 			next(s)
 		}
-	}
-}
-
-func MyMiddleware(next ssh.Handler) ssh.Handler {
-	return func(s ssh.Session) {
-		next(s)
 	}
 }
 
@@ -150,12 +185,30 @@ func ExecCmd(next ssh.Handler) ssh.Handler {
 	}
 }
 
-func SSHD() error {
+func Sanitizers(next ssh.Handler) ssh.Handler {
+	return func(s ssh.Session) {
+		logrus.Info("Commandline sanitizing")
+		str := s.Command()
+		if len(str) == 0 {
+			sio.Fatalf(s, "Empty command, Support commands: %q", define.Whitelist)
+		}
+
+		// Sanitizing the command with whitelist
+		if define.IsWhitelisted(str[0]) {
+			next(s)
+		} else {
+			sio.Fatalf(s, "Command not allowed, Support commands: %q\n", define.Whitelist)
+		}
+	}
+}
+
+func SSHExec() error {
 	addr := define.Addr + ":" + define.Port
 	logrus.Infof("Starting SSH server at %s", addr)
 	return ssh.ListenAndServe(addr, nil, WithMiddleware(
-		ExecCmd,
+		//ExecCmd,
+		RunFFMPEG,
 		InstallFFMPEG,
-		MyMiddleware,
+		Sanitizers,
 	))
 }

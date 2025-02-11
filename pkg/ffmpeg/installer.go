@@ -66,19 +66,19 @@ func (i *Installer) Setup(ctx context.Context) error {
 func (i *Installer) Test(ctx context.Context) error {
 	ffBin := filepath.Join(i.PREFIX, "ffmpeg", "bin", "ffmpeg")
 	sio.Printf(i.Session, "Testing %q\n", ffBin)
-	err := os.Chmod(ffBin, 0755)
-	if err != nil {
+	if err := os.Chmod(ffBin, 0755); err != nil {
 		return fmt.Errorf("chmod ffmpeg failed: %v", err)
 	}
+
 	cmd := exec.CommandContext(ctx, ffBin, "-version")
 	cmd.Env = append(cmd.Env, fmt.Sprintf("DYLD_LIBRARY_PATH=%s", filepath.Join(i.PREFIX, "ffmpeg", "lib")))
 	cmd.Stdout = io.MultiWriter(i.Session, os.Stdout)
 	cmd.Stderr = io.MultiWriter(i.Session.Stderr(), os.Stderr)
 
-	err = cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("test ffmpeg failed: %v", err)
 	}
+	
 	sio.Println(i.Session, "Test successful")
 	return nil
 }

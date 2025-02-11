@@ -6,8 +6,7 @@ import (
 )
 
 func main() {
-	if err := sshd.SSHD(); err != nil {
-		logrus.Errorf("Error: %s", err)
-		return
+	if err := sshd.SSHExec(); err != nil {
+		logrus.Fatalf("Error: %s", err)
 	}
 }
