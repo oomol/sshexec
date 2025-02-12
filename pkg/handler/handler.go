@@ -23,15 +23,6 @@ type Runner interface {
 }
 
 func ExecHandler(s ssh.Session, ctx context.Context, targetBin string, envs, args []string) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	go func() {
-		// The context is canceled when the client's connection closes or I/ O operation fails.
-		<-s.Context().Done()
-		cancel()
-	}()
-
 	cmd := exec.CommandContext(ctx, targetBin, args...)
 	cmd.Env = append(cmd.Env, envs...)
 	logrus.Infof("Run %q with args %q with env %q", targetBin, args, envs)
