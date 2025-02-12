@@ -78,8 +78,17 @@ func (i *Installer) Test(ctx context.Context) error {
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("test ffmpeg failed: %v", err)
 	}
-	
+
 	sio.Println(i.Session, "Test successful")
+	return nil
+}
+
+func (i *Installer) CleanUp(ctx context.Context) error {
+	if i.FFMPEGTarXZ != "" {
+		if err := os.Remove(i.FFMPEGTarXZ); err != nil {
+			return fmt.Errorf("remove install package failed: %v", err)
+		}
+	}
 	return nil
 }
 
