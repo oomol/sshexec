@@ -18,5 +18,5 @@ const (
 
 var (
 	Addr = "127.0.0.1"
-	Port = "5321"
+	Port = "5322"
 )
