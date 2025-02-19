@@ -33,7 +33,6 @@ type Installer struct {
 }
 
 func (r *Runner) Run(ctx context.Context) error {
-
 	return myexec.Exec(r.Session, ctx, r.File, r.Envs, r.Args)
 }
 
