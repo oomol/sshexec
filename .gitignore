@@ -1,2 +1,4 @@
 sshd
+sshexec
+out/**
 .idea/**
