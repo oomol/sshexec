@@ -9,7 +9,7 @@ import (
 	"sshd/pkg/sio"
 )
 
-// Exec is a function that responsible for executing the target binary with the provided args and envs over the ssh session
+// Exec is a function that responsible for executing the target binary with the provided args and flags over the ssh session
 func Exec(s ssh.Session, ctx context.Context, targetBin string, envs, args []string) error {
 	cmd := exec.CommandContext(ctx, targetBin, args...)
 	cmd.Env = append(cmd.Env, envs...)
