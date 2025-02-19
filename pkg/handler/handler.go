@@ -2,9 +2,10 @@ package handler
 
 import (
 	"context"
+	"os"
+
 	"github.com/gliderlabs/ssh"
 	"github.com/sirupsen/logrus"
-	"os"
 
 	"path/filepath"
 	"sshd/pkg/define"
@@ -86,7 +87,6 @@ func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 					sio.Fatalf(s, "Test ffmpeg error: %s\n", err.Error())
 				}
 			}()
-
 		} else {
 			next(s)
 		}

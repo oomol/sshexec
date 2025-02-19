@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/Code-Hex/pget"
-	"github.com/gliderlabs/ssh"
 	"io"
 	"os"
 	"os/exec"
@@ -15,6 +13,9 @@ import (
 	myexec "sshd/pkg/exec"
 	"sshd/pkg/hash"
 	"sshd/pkg/sio"
+
+	"github.com/Code-Hex/pget"
+	"github.com/gliderlabs/ssh"
 )
 
 type Runner struct {
@@ -32,6 +33,7 @@ type Installer struct {
 }
 
 func (r *Runner) Run(ctx context.Context) error {
+
 	return myexec.Exec(r.Session, ctx, r.File, r.Envs, r.Args)
 }
 
@@ -49,12 +51,12 @@ func (i *Installer) Download(ctx context.Context) error {
 		"-o", ffmpegTarXZFile,
 		define.FFReleaseURL,
 	}); err != nil {
-		return fmt.Errorf("download ffmpeg failed: %v", err)
+		return fmt.Errorf("download ffmpeg failed: %w", err)
 	}
 
 	err := hash.CmpFileChecksum(ffmpegTarXZFile, define.FFMSha256)
 	if err != nil {
-		return fmt.Errorf("checksum failed: %v", err)
+		return fmt.Errorf("checksum failed: %w", err)
 	}
 	sio.Println(i.Session, "Download successful")
 	i.FFMPEGTarXZ = ffmpegTarXZFile
@@ -68,7 +70,7 @@ func (i *Installer) Unpack(ctx context.Context) error {
 	sio.Println(i.Session, "Unpacking ffmpeg binaries")
 	err := decompress.Extract(ctx, i.FFMPEGTarXZ, i.PREFIX)
 	if err != nil {
-		return fmt.Errorf("unpack ffmpeg failed: %v", err)
+		return fmt.Errorf("unpack ffmpeg failed: %w", err)
 	}
 
 	return nil
@@ -83,7 +85,7 @@ func (i *Installer) Test(ctx context.Context) error {
 	ffBin := filepath.Join(i.PREFIX, "ffmpeg", "bin", "ffmpeg")
 	sio.Printf(i.Session, "Testing %q\n", ffBin)
 	if err := os.Chmod(ffBin, 0755); err != nil {
-		return fmt.Errorf("chmod ffmpeg failed: %v", err)
+		return fmt.Errorf("chmod ffmpeg failed: %w", err)
 	}
 
 	cmd := exec.CommandContext(ctx, ffBin, "-version")
@@ -92,7 +94,7 @@ func (i *Installer) Test(ctx context.Context) error {
 	cmd.Stderr = io.MultiWriter(i.Session.Stderr(), os.Stderr)
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("test ffmpeg failed: %v", err)
+		return fmt.Errorf("test ffmpeg failed: %w", err)
 	}
 
 	sio.Println(i.Session, "Test successful")
@@ -102,7 +104,7 @@ func (i *Installer) Test(ctx context.Context) error {
 func (i *Installer) CleanUp(ctx context.Context) error {
 	if i.FFMPEGTarXZ != "" {
 		if err := os.Remove(i.FFMPEGTarXZ); err != nil {
-			return fmt.Errorf("remove install package failed: %v", err)
+			return fmt.Errorf("remove install package failed: %w", err)
 		}
 	}
 	return nil
