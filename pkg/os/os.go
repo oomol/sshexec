@@ -3,9 +3,10 @@ package os
 import (
 	"bytes"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"os/exec"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 func getMacOSVersion() (string, error) {

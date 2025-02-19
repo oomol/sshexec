@@ -2,6 +2,7 @@ package sio
 
 import (
 	"fmt"
+
 	"github.com/gliderlabs/ssh"
 	"github.com/sirupsen/logrus"
 )

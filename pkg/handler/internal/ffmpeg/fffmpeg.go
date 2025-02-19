@@ -43,7 +43,7 @@ func (r *Runner) CleanUp(ctx context.Context) error {
 
 func (i *Installer) Download(ctx context.Context) error {
 	sio.Printf(i.Session, "Downloading ffmpeg binaries from %q\n", i.URL)
-	ffmpegTarXZFile := filepath.Join(os.TempDir() + "ffmpeg.tar.xz")
+	ffmpegTarXZFile := filepath.Join(os.TempDir(), "ffmpeg.tar.xz")
 	pGet := pget.New()
 	if err := pGet.Run(ctx, "1.0", []string{
 		"-p", "4",

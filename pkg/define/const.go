@@ -13,7 +13,7 @@ const (
 )
 
 const (
-	DYLD_LIBRARY_PATH = "DYLD_LIBRARY_PATH"
+	DYLD_LIBRARY_PATH = "DYLD_LIBRARY_PATH" //nolint:stylecheck
 )
 
 var (

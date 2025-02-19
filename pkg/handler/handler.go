@@ -2,8 +2,7 @@ package handler
 
 import (
 	"context"
-	"github.com/gliderlabs/ssh"
-	"github.com/sirupsen/logrus"
+
 	"os"
 	"path/filepath"
 	"sshd/pkg/define"
@@ -12,6 +11,9 @@ import (
 	os2 "sshd/pkg/os"
 	"sshd/pkg/sio"
 	"sshd/pkg/utils"
+
+	"github.com/gliderlabs/ssh"
+	"github.com/sirupsen/logrus"
 )
 
 type Middleware func(next ssh.Handler) ssh.Handler

@@ -3,11 +3,12 @@ package decompress
 import (
 	"context"
 	"fmt"
-	"github.com/mholt/archives"
 	"io"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/mholt/archives"
 )
 
 func Extract(ctx context.Context, src, targetDir string) error {
