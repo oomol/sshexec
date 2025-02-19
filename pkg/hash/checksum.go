@@ -5,24 +5,21 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os"
 )
 
-func CmpFileChecksum(path string, wantSum string) error {
+func CmpFileChecksum(path string, wantSum string) (string, error) {
 	sum, err := sha256sum(path)
 	if err != nil {
-		return fmt.Errorf("sha256sum(%s) failed: %v", path, err)
+		return "", fmt.Errorf("sha256sum(%q) failed: %v", path, err)
 	}
 
 	if sum != wantSum {
-		logrus.Errorf("checksum mismatch: got %s, want %s", sum, wantSum)
-		return errors.New("checksum mismatch")
+		return sum, errors.New("checksum mismatch")
 	}
-	logrus.Infoln("checksum matched")
 
-	return nil
+	return sum, nil
 }
 
 func sha256sum(path string) (string, error) {
