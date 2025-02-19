@@ -162,10 +162,13 @@ func RunFFMPEG(next ssh.Handler) ssh.Handler {
 
 func Sanitizers(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
+		// Parameter parsing follows the openssh standard implementation
+		// https://stackoverflow.com/questions/53465980/how-to-keep-parameter-with-spaces-when-running-remote-script-file-with-ssh
 		logrus.Infof("Sanitizing string: %q", s.Command())
 		str := s.Command()
 		if len(str) == 0 {
 			sio.Fatalf(s, "Empty command, Support commands: %q", define.Whitelist)
+			return
 		}
 
 		// Sanitizing the command with whitelist
@@ -173,6 +176,7 @@ func Sanitizers(next ssh.Handler) ssh.Handler {
 			next(s)
 		} else {
 			sio.Fatalf(s, "Command %q not allowed, Support commands: %q\n", str[0], define.Whitelist)
+			return
 		}
 	}
 }
