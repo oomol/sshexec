@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sshd/pkg/decompress"
-	"sshd/pkg/define"
 	myexec "sshd/pkg/exec"
 	"sshd/pkg/hash"
 	"sshd/pkg/sio"
@@ -29,6 +28,7 @@ type Installer struct {
 	URL         string
 	PREFIX      string
 	FFMPEGTarXZ string
+	Sha256Sum   string
 	Session     ssh.Session
 }
 
@@ -48,15 +48,15 @@ func (i *Installer) Download(ctx context.Context) error {
 	if err := pGet.Run(ctx, "1.0", []string{
 		"-p", "4",
 		"-o", ffmpegTarXZFile,
-		define.FFReleaseURL,
+		i.URL,
 	}); err != nil {
 		return fmt.Errorf("download ffmpeg failed: %w", err)
 	}
 
-	err := hash.CmpFileChecksum(ffmpegTarXZFile, define.FFMSha256)
-	if err != nil {
-		return fmt.Errorf("checksum failed: %w", err)
+	if sum, err := hash.CmpFileChecksum(ffmpegTarXZFile, i.Sha256Sum); err != nil {
+		return fmt.Errorf("checksum failed: %w, want %q ,got %q", err, i.Sha256Sum, sum)
 	}
+
 	sio.Println(i.Session, "Download successful")
 	i.FFMPEGTarXZ = ffmpegTarXZFile
 	return nil

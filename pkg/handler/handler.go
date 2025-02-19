@@ -9,6 +9,7 @@ import (
 	"sshd/pkg/define"
 	"sshd/pkg/exec"
 	"sshd/pkg/handler/internal/ffmpeg"
+	os2 "sshd/pkg/os"
 	"sshd/pkg/sio"
 	"sshd/pkg/utils"
 )
@@ -50,10 +51,21 @@ func InstallFFMPEG(next ssh.Handler) ssh.Handler {
 			}
 
 			sio.Printf(s, "GetStudioHomeDir: %q\n", stduioHome)
+
+			// by default, we pick up the ffmpeg for ventura
+			ffURL := define.FFReleaseURLForVentura
+			ffSha256Sum := define.FFMSha256ForVentura
+			// For latest macOS version, we pack up the most recent ffmpeg binaries
+			if os2.IsSequoia() {
+				ffURL = define.FFReleaseURLForSequoia
+				ffSha256Sum = define.FFMSha256ForSequoia
+			}
+
 			installer := ffmpeg.Installer{
-				PREFIX:  filepath.Join(stduioHome, "host-shared"),
-				URL:     define.FFReleaseURL,
-				Session: s,
+				PREFIX:    filepath.Join(stduioHome, "host-shared"),
+				URL:       ffURL,
+				Session:   s,
+				Sha256Sum: ffSha256Sum,
 			}
 
 			// Download ffmpeg
