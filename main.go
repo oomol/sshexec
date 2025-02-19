@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
 	"os"
 	"sshd/pkg/flags"
 	"sshd/pkg/sshd"
+
+	"github.com/sirupsen/logrus"
 )
 
 func init() {

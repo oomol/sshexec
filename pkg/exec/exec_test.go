@@ -1,13 +1,14 @@
 package exec
 
 import (
-	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/sirupsen/logrus"
 )
 
-const MyJsonData = `
+const MyJSONData = `
 {
   "mountPoints": [
     {
@@ -31,8 +32,8 @@ func TestExecPathCover(t *testing.T) {
 	if err != nil {
 		logrus.Fatalf("Failed to create json file: %v", err)
 	}
-	_, _ = jsonFile.WriteString(MyJsonData)
-	MyJsonFile = p
+	_, _ = jsonFile.WriteString(MyJSONData)
+	MyJSONFile = p
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -85,8 +86,8 @@ func TestExecPathCover2(t *testing.T) {
 	if err != nil {
 		logrus.Fatalf("Failed to create json file: %v", err)
 	}
-	_, _ = jsonFile.WriteString(MyJsonData)
-	MyJsonFile = p
+	_, _ = jsonFile.WriteString(MyJSONData)
+	MyJSONFile = p
 
 	testArgsArray := []string{
 		"test",

@@ -6,10 +6,11 @@ package exec
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 type MountPoint struct {
@@ -19,7 +20,7 @@ type MountPoint struct {
 	Undeletable      bool   `json:"undeletable,omitempty"`
 }
 
-var MyJsonFile string
+var MyJSONFile string
 
 type DataStruct struct {
 	MountPoints       []MountPoint `json:"mountPoints"`
@@ -31,8 +32,8 @@ const (
 	oomolSessions = "/oomol-driver/sessions"
 )
 
-// loadJson loads the mount-point.json file from the given path using json.Unmarshal
-func loadJson(path string) (*DataStruct, error) {
+// loadJSON loads the mount-point.json file from the given path using json.Unmarshal
+func loadJSON(path string) (*DataStruct, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -51,7 +52,7 @@ const (
 	ooHomePrefix    = ".oomol-studio"
 	ooAppConfig     = "app-config"
 	ooStorage       = "oomol-storage"
-	ooMountJsonFile = "mount-point.json"
+	ooMountJSONFile = "mount-point.json"
 
 	ooSessions = "sessions"
 )
@@ -63,12 +64,12 @@ func ContainerPath2HostPath(arg string) (string, error) {
 		return "", fmt.Errorf("failed to get user home directory: %v", err)
 	}
 
-	if MyJsonFile == "" {
-		MyJsonFile = filepath.Join(homeDir, ooHomePrefix, ooAppConfig, ooStorage, ooMountJsonFile)
+	if MyJSONFile == "" {
+		MyJSONFile = filepath.Join(homeDir, ooHomePrefix, ooAppConfig, ooStorage, ooMountJSONFile)
 	}
 
-	logrus.Infof("Load MountPoint json file: %q", MyJsonFile)
-	jsonData, err := loadJson(MyJsonFile)
+	logrus.Infof("Load MountPoint json file: %q", MyJSONFile)
+	jsonData, err := loadJSON(MyJSONFile)
 	if err != nil {
 		return "", fmt.Errorf("failed to load json file: %v", err)
 	}

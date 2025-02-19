@@ -2,11 +2,12 @@ package exec
 
 import (
 	"context"
-	"github.com/gliderlabs/ssh"
-	"github.com/sirupsen/logrus"
 	"io"
 	"os/exec"
 	"sshd/pkg/sio"
+
+	"github.com/gliderlabs/ssh"
+	"github.com/sirupsen/logrus"
 )
 
 // Exec is a function that responsible for executing the target binary with the provided args and flags over the ssh session
@@ -59,5 +60,4 @@ func Exec(s ssh.Session, ctx context.Context, targetBin string, envs, args []str
 	}
 
 	return nil
-
 }

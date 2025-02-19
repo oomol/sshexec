@@ -15,6 +15,9 @@ build-arm64:
 build-amd64:
 	GOARCH=amd64 $(GOBUILD) -o out/$(BINARY_NAME)-amd64 -v
 
+lint:
+	golangci-lint run
+
 # Clean the build files
 clean:
 	$(GOCLEAN)
