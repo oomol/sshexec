@@ -8,6 +8,8 @@ on:
     branches:
       - 'main'
       - 'ihexon'
+    tags:
+      - 'v*.*.*'
 jobs:
   build:
     runs-on: macos-latest

@@ -18,6 +18,7 @@ func init() {
 	})
 	logrus.SetLevel(logrus.InfoLevel)
 }
+
 func main() {
 	// assume always has parent pid
 	flags.SetOomolStudioPID(os.Getppid())
