@@ -3,7 +3,14 @@ module sshd
 go 1.23
 
 require (
-	github.com/Code-Hex/pget v0.2.1 // indirect
+	github.com/Code-Hex/pget v0.2.1
+	github.com/gliderlabs/ssh v0.3.9-0.20250127223818-909fa952d4e4
+	github.com/mholt/archives v0.1.1-0.20250204160917-37d60596a7e1
+	github.com/shirou/gopsutil/v3 v3.24.5
+	github.com/sirupsen/logrus v1.9.4-0.20241118143825-d1e633264448
+)
+
+require (
 	github.com/Code-Hex/updater v0.0.0-20160712085121-c3f278672520 // indirect
 	github.com/STARRY-S/zip v0.2.1 // indirect
 	github.com/Songmu/prompter v0.5.1 // indirect
@@ -18,29 +25,32 @@ require (
 	github.com/cheggaaa/pb/v3 v3.1.6 // indirect
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/fatih/color v1.18.0 // indirect
-	github.com/gliderlabs/ssh v0.3.9-0.20250127223818-909fa952d4e4 // indirect
+	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/jessevdk/go-flags v1.6.1 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
+	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mcuadros/go-version v0.0.0-20190830083331-035f6764e8d2 // indirect
-	github.com/mholt/archives v0.1.1-0.20250204160917-37d60596a7e1 // indirect
 	github.com/nwaples/rardecode/v2 v2.1.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/sirupsen/logrus v1.9.4-0.20241118143825-d1e633264448 // indirect
+	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sorairolake/lzip-go v0.3.5 // indirect
 	github.com/therootcompany/xz v1.0.1 // indirect
+	github.com/tklauser/go-sysconf v0.3.12 // indirect
+	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
+	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/term v0.29.0 // indirect
