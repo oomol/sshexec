@@ -27,3 +27,26 @@ jobs:
 
       - name: Build
         run: make build
+
+      - name: Upload artifact
+        uses: 'actions/upload-artifact@v4'
+        with:
+          name: sshexec
+          path: |
+            out/sshexec-amd64
+            out/sshexec-arm64
+          if-no-files-found: error
+          overwrite: true
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
+          files: |
+            out/sshexec-amd64
+            out/sshexec-arm64
+          append_body: true
+          draft: false
+          prerelease: false
+          make_latest: true
