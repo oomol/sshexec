@@ -1,16 +1,14 @@
 [![Build and test](https://github.com/oomol/sshexec/actions/workflows/build.yaml/badge.svg)](https://github.com/oomol/sshexec/actions/workflows/build.yaml)
 
-# Host utils Installer
+> Note that this is not a standard SSHD service, but a set of `Handlers` that use the OpenSSH protocol to call ffmpeg or whisper, etc.
+> Programs that need to call MacOS hardware resource capabilities are installed on the local machine and provide corresponding calling interfaces.
 
-> 注意这并不是一个标准的 SSHD 服务，只是使用 OpenSSH 协议调用一组 `Handler` 将 ffmpeg 或者 whisper 等
-> 需要调用MacOS硬件资源能力的程序安装到本机，并提供对应的调用接口。
+# What is a Handler
+- A Handler is a set of scripts or a string of code that is used to quickly install and set up ffmpeg or whisper
+- A Handler also provides an interface for external calls (through the standard SSH protocol)
 
-# 什么是 Handler
-- Handler 是一组脚本或者一串代码，用于快速安装并设置 ffmpeg 或者 whisper
-- Handler 也提供对外调用的接口（通过标准 SSH 协议）
-
-# 如何对外提供调用接口
-使用 ssh 直接执行命令
+# How to provide external call interface
+Use ssh to directly execute commands
 
 ```shell
 ssh -p <PORT> localhost ffmpeg [args...]
@@ -20,6 +18,10 @@ ssh -p <PORT> localhost ffmpeg [args...]
 ssh -p <PORT> localhost whisper [args...]
 ```
 
-> 这个程序不提供 Handler 之外的访问，也就是不信任容器内的 SSH 访问请求，如
-> `ssh -p <PORT> localhost cat .ssh/id_ed25519` (获取 macos host 私钥)，则会被拒绝执行
-> 因为此程序只提供 Handler 的安装逻辑 ，也只对外提供 Handler 的调用接口。
+> This program does not provide access outside of the Handler, that is, it does not trust SSH access requests within the container, such as
+> `ssh -p <PORT> localhost cat .ssh/id_ed25519` (obtaining the private key of the macos host), which will be rejected
+> Because this program only provides the installation logic of the Handler and only provides the Handler's calling interface to the outside world.
+
+# TODO
+- [ ] support whisper installer
+- [ ] save sshexec's stderr into file, keep stderr strictly the same from host process

@@ -12,6 +12,7 @@ import (
 )
 
 func Extract(ctx context.Context, src, targetDir string) error {
+	// TODO: Bug! should not remote targetDir, remote subdir targetDir+ffmpeg
 	err := os.RemoveAll(targetDir)
 	if err != nil {
 		return err
