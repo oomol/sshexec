@@ -1,8 +1,14 @@
 #! /usr/bin/env bash
 set -e
-USER=ihexon
-IP_ADDR=192.168.1.250
-PORT=22
+set -u
+cmd_file="/tmp/.cmd"
+# Default is oomol
+USER=oomol
+# https://github.com/containers/gvisor-tap-vsock/blob/f0f18025e5b7c7c281a11dfd81034641b40efe18/cmd/gvproxy/main.go#L56
+IP_ADDR=192.168.127.254
+# https://github.com/oomol/sshexec/blob/f6e0e1583fc874727d68cc5cc3213dff6867dd0e/pkg/define/const.go#L21
+PORT=5322
+
 arg0="$(basename "$0")"
 
 expand-q() {
@@ -22,7 +28,6 @@ write_cmd() {
 	echo -n ' '
 	output_args "$arg0" "$@"
 }
+write_cmd "$@" >"$cmd_file"
 
-write_cmd "$@" >/tmp/.cmd
-
-chmod +x /tmp/.cmd && /tmp/.cmd
+chmod +x "$cmd_file" && "$cmd_file"
