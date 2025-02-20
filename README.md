@@ -1,3 +1,5 @@
+[![Build and test](https://github.com/oomol/sshexec/actions/workflows/build.yaml/badge.svg)](https://github.com/oomol/sshexec/actions/workflows/build.yaml)
+
 # Host utils Installer
 
 > 注意这并不是一个标准的 SSHD 服务，只是使用 OpenSSH 协议调用一组 `Handler` 将 ffmpeg 或者 whisper 等
