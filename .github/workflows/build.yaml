@@ -37,6 +37,8 @@ jobs:
           path: |
             out/sshexec-amd64
             out/sshexec-arm64
+            out/installer.sh
+            out/caller.sh
           if-no-files-found: error
           overwrite: true
 
@@ -48,6 +50,8 @@ jobs:
           files: |
             out/sshexec-amd64
             out/sshexec-arm64
+            out/installer.sh
+            out/caller.sh
           append_body: true
           draft: false
           prerelease: false
