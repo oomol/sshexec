@@ -18,10 +18,12 @@ jobs:
       - name: Set up Go
         uses: 'actions/setup-go@v5'
         with:
-          go-version: '1.23.4'
+          go-version: stable
 
       - name: Lint
-        run: brew update && brew install golangci-lint && make lint
+        uses: 'golangci/golangci-lint-action@v6'
+        with:
+          version: 'latest'
 
       - name: Build
         run: make build
