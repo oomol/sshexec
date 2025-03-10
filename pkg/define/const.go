@@ -3,7 +3,6 @@ package define
 const (
 	FFMPEG                 = "ffmpeg"
 	FFPROBE                = "ffprobe"
-	SHELL                  = "bash"
 	InstallFFMPEG          = "install_ffmpeg"
 	StudioDir              = ".oomol-studio"
 	FFReleaseURLForVentura = "https://github.com/oomol/builded/releases/download/v1.4/ffmpeg_macos_arm64_ventura.tar.xz"

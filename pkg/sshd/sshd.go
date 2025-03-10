@@ -11,6 +11,7 @@ import (
 func SSHExec() error {
 	addr := define.Addr + ":" + define.Port
 	logrus.Infof("Starting SSH server at %s", addr)
+
 	return ssh.ListenAndServe(addr, nil, handler.WithMiddleware(
 		handler.RunFFMPEG,
 		handler.InstallFFMPEG,

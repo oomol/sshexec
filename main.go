@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"sshd/pkg/flags"
 	os2 "sshd/pkg/os"
 	"sshd/pkg/sshd"
@@ -11,19 +13,42 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func init() {
+func setupLogger() {
 	logrus.SetFormatter(&logrus.TextFormatter{
-		FullTimestamp: true,
-		ForceColors:   true,
+		FullTimestamp:   true,
+		ForceColors:     true,
+		DisableColors:   false,
+		TimestampFormat: "2006-01-02 15:04:05.000",
 	})
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		homeDir = "/tmp"
+	}
+
+	logFile := filepath.Join(homeDir, ".oomol-studio", "ovm-krun", "logs", "sshexec.log")
+	if runtime.GOARCH == "amd64" {
+		logFile = filepath.Join(homeDir, ".oomol-studio", "ovm", "logs", "sshexec.log")
+	}
+
+	if err = os.MkdirAll(filepath.Dir(logFile), 0755); err != nil {
+		logFile = filepath.Join(homeDir, "sshexec.log")
+	}
+
+	fd, _ := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
+	logrus.SetOutput(fd)
+
 	logrus.SetLevel(logrus.InfoLevel)
 }
 
 func main() {
+	setupLogger()
 	// assume always has parent pid
-	flags.SetOomolStudioPID(os.Getppid())
+	ppid := os.Getppid()
+	logrus.Infof("PPID: %d", ppid)
+	flags.SetOomolStudioPID(ppid)
 
 	errChan := make(chan error, 1)
+
 	go func() {
 		errChan <- waitForStudioExit()
 	}()
