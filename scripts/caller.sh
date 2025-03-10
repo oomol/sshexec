@@ -24,6 +24,8 @@ output_args() {
 
 write_cmd() {
 	echo "#! /usr/bin/env bash"
+	echo -n 'exec'
+	echo -n ' '
 	echo -n ssh -q -o StrictHostKeyChecking=no $USER@$IP_ADDR -p $PORT
 	echo -n ' '
 	output_args "$arg0" "$@"
@@ -31,4 +33,5 @@ write_cmd() {
 }
 write_cmd "$@" >"$cmd_file"
 
-chmod +x "$cmd_file" && "$cmd_file"
+chmod +x "$cmd_file"
+exec "$cmd_file"
