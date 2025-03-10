@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 set -e
 set -u
-cmd_file="/tmp/.cmd_$RANDOM"
+cmd_file="/tmp/.cmd_$(date +%s)"
 # Default is oomol
 USER=oomol
 # https://github.com/containers/gvisor-tap-vsock/blob/f0f18025e5b7c7c281a11dfd81034641b40efe18/cmd/gvproxy/main.go#L56
