@@ -27,6 +27,7 @@ write_cmd() {
 	echo -n ssh -q -o StrictHostKeyChecking=no $USER@$IP_ADDR -p $PORT
 	echo -n ' '
 	output_args "$arg0" "$@"
+	sync
 }
 write_cmd "$@" >"$cmd_file"
 
