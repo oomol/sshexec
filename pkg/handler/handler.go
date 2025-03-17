@@ -108,7 +108,7 @@ func RunFFMPEG(next ssh.Handler) ssh.Handler {
 			}
 			// ffmpeg or ffprobe
 			ffBin := filepath.Join(studioHome, "host-shared", "ffmpeg", "bin", s.Command()[0])
-			env := define.DYLD_LIBRARY_PATH + "=" + filepath.Join(studioHome, "host-shared", "ffmpeg", "lib")
+			env := define.DYLD_LIBRARY_PATH + "=" + filepath.Join(studioHome, "host-shared", "ffmpeg", "libs")
 
 			progArgs, err := exec.DoArgsSanitizers(s.Command()[1:])
 			if err != nil {
