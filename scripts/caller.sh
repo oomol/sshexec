@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 set -e
 set -u
-cmd_file="/tmp/.cmd_$(date +%s)"
+cmd_file="/tmp/.cmd_$(uuidgen)"
 # Default is oomol
 USER=oomol
 # https://github.com/containers/gvisor-tap-vsock/blob/f0f18025e5b7c7c281a11dfd81034641b40efe18/cmd/gvproxy/main.go#L56
@@ -29,9 +29,9 @@ write_cmd() {
 	echo -n ssh -q -o StrictHostKeyChecking=no $USER@$IP_ADDR -p $PORT
 	echo -n ' '
 	output_args "$arg0" "$@"
-	sync
 }
 write_cmd "$@" >"$cmd_file"
 
 chmod +x "$cmd_file"
+sync
 exec "$cmd_file"
