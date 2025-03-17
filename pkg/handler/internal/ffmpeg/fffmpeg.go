@@ -88,7 +88,7 @@ func (i *Installer) Test(ctx context.Context) error {
 	}
 
 	cmd := exec.CommandContext(ctx, ffBin, "-version")
-	cmd.Env = append(cmd.Env, fmt.Sprintf("DYLD_LIBRARY_PATH=%s", filepath.Join(i.PREFIX, "ffmpeg", "lib")))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("DYLD_LIBRARY_PATH=%s", filepath.Join(i.PREFIX, "ffmpeg", "libs")))
 	cmd.Stdout = io.MultiWriter(i.Session, os.Stdout)
 	cmd.Stderr = io.MultiWriter(i.Session.Stderr(), os.Stderr)
 
