@@ -1,95 +1,100 @@
----
+version: "2"
 run:
   concurrency: 6
-  timeout: 5m
   modules-download-mode: readonly
 linters:
-  enable-all: true
+  default: all
   disable:
-    # too many reports but requires attention
-    - depguard
-    - intrange # should be turned on but we have to convert each place manually as there is no auto fix function
-    - tagalign
-    - perfsprint
-    - typecheck
-    # useful hints that should be addressed
-    - testifylint # all of reports that should be fixed
-    - nakedret
-    - gosmopolitan # usage of time.Local in pkg/k8s.io
-    - tagliatelle # too many JSON keys cannot be changed due to compat
-    - dupword # too many false positives (e.g., in tests)
-    - gocognit
-    - testpackage
-    - err113
-    - errorlint
-    - wrapcheck
-    - paralleltest
-    - wsl
-    - godox
-    - tparallel
-    - nlreturn
-    - noctx
-    - nestif
-    - predeclared
-    - thelper
-    - forbidigo
-    - exhaustive
-    - gofumpt
-    - gci
-    - godot
-    - dupl
-    - funlen
-    - gochecknoglobals
-    - gochecknoinits
-    - goconst
-    - gocyclo
-    - lll
-    - gosec
-    - musttag # way to many warnings to fix for now, also some false positives
-    - mnd # way to many false positives
-    - gomoddirectives
+    - canonicalheader
     - containedctx
     - contextcheck
     - cyclop
-    - canonicalheader # our current header values are fixed and should not be changed
+    - depguard
+    - dupl
+    - dupword
+    - err113
     - errname
-    - forcetypeassert
-    - ireturn
-    - varnamelen
-    - maintidx
-    - nilnil
-    - nonamedreturns
+    - errorlint
+    - exhaustive
     - exhaustruct
-    # deprecated linters
-    - tenv
-linters-settings:
-  errcheck:
-    check-blank: false
-  nolintlint:
-    allow-unused: true
-    require-specific: true
-  revive:
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocyclo
+    - godot
+    - godox
+    - gomoddirectives
+    - gosec
+    - gosmopolitan
+    - intrange
+    - ireturn
+    - lll
+    - maintidx
+    - mnd
+    - musttag
+    - nakedret
+    - nestif
+    - nilnil
+    - nlreturn
+    - noctx
+    - nonamedreturns
+    - paralleltest
+    - perfsprint
+    - predeclared
+    - tagalign
+    - tagliatelle
+    - testifylint
+    - testpackage
+    - thelper
+    - tparallel
+    - varnamelen
+    - wrapcheck
+    - wsl
+  settings:
+    errcheck:
+      check-blank: false
+    nolintlint:
+      require-specific: true
+      allow-unused: true
+    revive:
+      rules:
+        - name: unused-parameter
+          disabled: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      - name: unused-parameter
-        disabled: true
-
+      - linters:
+          - recvcheck
+        path: pkg/k8s.io/
+    paths:
+      - swagger.go
+      - contrib
+      - dependencies
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  # Maximum issues count per one linter.
-  # Set to 0 to disable.
-  # Default: 50
   max-issues-per-linter: 0
-  # Maximum count of issues with the same text.
-  # Set to 0 to disable.
-  # Default: 3
   max-same-issues: 0
-  exclude-dirs-use-default: true
-  exclude-dirs:
-    - contrib
-    - dependencies
-  exclude-files:
-    - swagger.go
-  exclude-rules:
-    # Exclude recvcheck from running on the imported k8s files, to much failures
-    - path: pkg/k8s.io/
-      linters:
-        - recvcheck
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - swagger.go
+      - contrib
+      - dependencies
+      - third_party$
+      - builtin$
+      - examples$
