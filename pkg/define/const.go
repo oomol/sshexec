@@ -5,10 +5,9 @@ const (
 	FFPROBE                = "ffprobe"
 	InstallFFMPEG          = "install_ffmpeg"
 	StudioDir              = ".oomol-studio"
-	FFReleaseURLForVentura = "https://github.com/oomol/builded/releases/download/v1.7/ffmpeg_macos_arm64_ventura.tar.xz"
-	FFReleaseURLForSequoia = "https://github.com/oomol/builded/releases/download/v1.7/ffmpeg_macos_arm64_sequoia.tar.xz"
-	FFMSha256ForVentura    = "79ea28ac973aae590761cff3dde0922f89ff153a8320e4e0a85befe02034cb7c"
-	FFMSha256ForSequoia    = "ea0bde7f9959fe3dd21fc1bd48e41a6ab88a8074dcff36d1f541d9dbe561fde2"
+	HostShared             = "host-shared"
+	FFReleaseURLForVentura = "https://github.com/jellyfin/jellyfin-ffmpeg/releases/download/v7.1.1-2/jellyfin-ffmpeg_7.1.1-2_portable_macarm64-gpl.tar.xz"
+	FFMSha256ForVentura    = "8ff4ed4eba151346d6d1ee894bbfcbd9f507dc82b34260f4567954136449001d"
 )
 
 const (

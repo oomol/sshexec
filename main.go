@@ -13,15 +13,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func init() {
-	_ = os.Unsetenv("http_proxy")
-	_ = os.Unsetenv("https_proxy")
-	_ = os.Unsetenv("HTTP_PROXY")
-	_ = os.Unsetenv("HTTPS_PROXY")
-	_ = os.Unsetenv("ftp_proxy")
-	_ = os.Unsetenv("FTP_PROXY")
-}
-
 func setupLogger() {
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp:   true,
@@ -63,7 +54,7 @@ func main() {
 	}()
 
 	go func() {
-		errChan <- sshd.SSHExec()
+		errChan <- sshd.Server()
 	}()
 
 	err := <-errChan

@@ -67,13 +67,7 @@ func ContainerPath2HostPath(arg string) (string, error) {
 	if MyJSONFile == "" {
 		MyJSONFile = filepath.Join(homeDir, ooHomePrefix, ooAppConfig, ooStorage, ooMountJSONFile)
 	}
-
-	logrus.Infof("Load MountPoint json file: %q", MyJSONFile)
-	jsonData, err := loadJSON(MyJSONFile)
-	if err != nil {
-		return "", fmt.Errorf("failed to load json file: %v", err)
-	}
-
+	
 	logrus.Infof("Process string: %q", arg)
 
 	// /oomol-driver/sessions --> $HOME/.oomol-studio/sessions
@@ -84,12 +78,18 @@ func ContainerPath2HostPath(arg string) (string, error) {
 		return newArg, nil
 	}
 
-	// /oomol-driver/ oomol-storage --> $HOME/oomol-storage
+	// /oomol-driver/oomol-storage --> $HOME/oomol-storage
 	if strings.Contains(arg, oomolStorage) {
 		path := filepath.Join(homeDir, ooStorage)
 		newArg := strings.Replace(arg, oomolStorage, path, 1)
 		logrus.Warnf("%q --> %q", arg, newArg)
 		return newArg, nil
+	}
+
+	logrus.Infof("Load MountPoint json file: %q", MyJSONFile)
+	jsonData, err := loadJSON(MyJSONFile)
+	if err != nil {
+		return "", fmt.Errorf("failed to load json file: %v", err)
 	}
 
 	// Other binding directories
