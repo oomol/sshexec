@@ -1,12 +1,13 @@
 package ffmpeg
 
 import (
-	"github.com/gliderlabs/ssh"
-	"github.com/sirupsen/logrus"
 	"sshd/pkg/define"
 	"sshd/pkg/exec"
 	"sshd/pkg/logger"
 	"sshd/pkg/provider/ffmpeg"
+
+	"github.com/gliderlabs/ssh"
+	"github.com/sirupsen/logrus"
 )
 
 const RunFFMPEGStage = "ffmpeg run handler"

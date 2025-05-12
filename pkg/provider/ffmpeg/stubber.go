@@ -3,13 +3,16 @@ package ffmpeg
 import (
 	"context"
 	"fmt"
-	"github.com/Code-Hex/pget"
-	"github.com/gliderlabs/ssh"
-	"github.com/sirupsen/logrus"
+
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/Code-Hex/pget"
+	"github.com/gliderlabs/ssh"
+	"github.com/sirupsen/logrus"
+
 	"sshd/pkg/archiver"
 	"sshd/pkg/define"
 	"sshd/pkg/hash"
@@ -71,24 +74,24 @@ func (l *Stubber) Run(ctx context.Context, target string, args, envs []string) e
 
 	stdOut, err := cmd.StdoutPipe()
 	if err != nil {
-		//logger.Fatalf(l.Session, "cmd.StdoutPipe() error: %s", err)
+		// logger.Fatalf(l.Session, "cmd.StdoutPipe() error: %s", err)
 		return fmt.Errorf("cmd.StdoutPipe() error: %w", err)
 	}
 
 	stdErr, err := cmd.StderrPipe()
 	if err != nil {
-		//logger.Fatalf(l.Session, "cmd.StderrPipe() error: %s", err)
+		// logger.Fatalf(l.Session, "cmd.StderrPipe() error: %s", err)
 		return fmt.Errorf("cmd.StderrPipe() error: %w", err)
 	}
 
 	stdIn, err := cmd.StdinPipe()
 	if err != nil {
-		//logger.Fatalf(l.Session, "cmd.StdinPipe() error: %s", err)
+		// logger.Fatalf(l.Session, "cmd.StdinPipe() error: %s", err)
 		return fmt.Errorf("cmd.StdinPipe() error: %w", err)
 	}
 
 	if err = cmd.Start(); err != nil {
-		//logger.Fatalf(l.Session, "cmd.Start() error: %v", err.Error())
+		// logger.Fatalf(l.Session, "cmd.Start() error: %v", err.Error())
 		return fmt.Errorf("cmd.Start() error: %w", err)
 	}
 
@@ -117,7 +120,6 @@ func (l *Stubber) Run(ctx context.Context, target string, args, envs []string) e
 }
 
 func (l *Stubber) CleanUp(ctx context.Context) error {
-
 	return nil
 }
 

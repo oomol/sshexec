@@ -67,7 +67,7 @@ func ContainerPath2HostPath(arg string) (string, error) {
 	if MyJSONFile == "" {
 		MyJSONFile = filepath.Join(homeDir, ooHomePrefix, ooAppConfig, ooStorage, ooMountJSONFile)
 	}
-	
+
 	logrus.Infof("Process string: %q", arg)
 
 	// /oomol-driver/sessions --> $HOME/.oomol-studio/sessions

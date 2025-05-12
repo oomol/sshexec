@@ -3,13 +3,15 @@ package archiver
 import (
 	"context"
 	"fmt"
-	"github.com/mholt/archives"
-	"github.com/sirupsen/logrus"
+
 	"io"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/mholt/archives"
+	"github.com/sirupsen/logrus"
 )
 
 const (

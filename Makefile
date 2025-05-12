@@ -10,10 +10,10 @@ all: build
 build: build-arm64 build-amd64 script
 
 build-arm64:
-	GOARCH=arm64 $(GOBUILD) -o out/$(BINARY_NAME)-arm64 -v
+	GOARCH=arm64 $(GOBUILD) -o out/$(BINARY_NAME)-arm64 -v sshd/cmd/
 
 build-amd64:
-	GOARCH=amd64 $(GOBUILD) -o out/$(BINARY_NAME)-amd64 -v
+	GOARCH=amd64 $(GOBUILD) -o out/$(BINARY_NAME)-amd64 -v  sshd/cmd/
 
 lint:
 	golangci-lint run

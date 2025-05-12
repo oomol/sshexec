@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"github.com/gliderlabs/ssh"
-	"github.com/sirupsen/logrus"
 	"sshd/pkg/define"
 	"sshd/pkg/logger"
+
+	"github.com/gliderlabs/ssh"
+	"github.com/sirupsen/logrus"
 )
 
 type Middleware func(next ssh.Handler) ssh.Handler
