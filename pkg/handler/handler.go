@@ -1,9 +1,10 @@
 package handler
 
 import (
-	"github.com/sirupsen/logrus"
 	"sshd/pkg/define"
 	slog "sshd/pkg/logger"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/gliderlabs/ssh"
 )

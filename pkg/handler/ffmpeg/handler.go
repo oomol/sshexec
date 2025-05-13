@@ -15,9 +15,9 @@ const RunFFMPEGStage = "ffmpeg run handler"
 func Run(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
 		targetBin := s.Command()[0]
-		if targetBin == define.FFPROBE || targetBin == define.FFMPEG {
-			logrus.Infof("run middleware: %q", RunFFMPEGStage)
-			stubber := ffmpeg.New(s)
+		if targetBin == define.FFPROBEBin || targetBin == define.FFMPEGBin {
+			logrus.Infof("run middleware: %q\r\n", RunFFMPEGStage)
+			stubber := ffmpeg.NewVersion6(s)
 			args, err := exec.DoArgsSanitizers(s.Command()[1:])
 			if err != nil {
 				slog.Fatalf(s, "DoArgsSanitizers error: %v\r\n", err)
@@ -39,10 +39,11 @@ const InstallStage = "ffmpeg install handler"
 
 func Install(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
-		// if the command is not define.InstallFFMPEG, do nothing and run next handler
-		if s.Command()[0] == define.InstallFFMPEG {
-			slog.Infof(s, "run middleware: %q", InstallStage)
-			stubber := ffmpeg.New(s)
+		// if the command is not InstallFFMPEGVersion6, do nothing and run the next handler
+		if s.Command()[0] == define.InstallFFMPEGVersion6 {
+			slog.Infof(s, "run middleware: %q\r\n", InstallStage)
+			stubber := ffmpeg.NewVersion6(s)
+
 			if err := stubber.Download(s.Context()); err != nil {
 				slog.Fatalf(s, "Download ffmpeg error: %v\r\n", err)
 				return

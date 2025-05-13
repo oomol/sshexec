@@ -26,10 +26,7 @@ type Stubber struct {
 	Version   define.Version
 }
 
-const VERSION = "7"
-const NAME = "ffmpeg_macos_arm64"
-
-func New(s ssh.Session) *Stubber {
+func NewVersion6(s ssh.Session) *Stubber {
 	stdioHome, err := utils.GetStudioHomeDir()
 	if err != nil {
 		logrus.Errorf("GetStudioHomeDir error: %v", err)
@@ -41,20 +38,47 @@ func New(s ssh.Session) *Stubber {
 	return &Stubber{
 		Session: s,
 		Version: define.Version{
-			PkgName: NAME,
-			PkgVer:  VERSION,
+			PkgName: define.FFMPEGPkgName,
+			PkgVer:  define.FFMPEG6Version,
 		},
 		Installer: define.InstallOpts{
-			URL:       define.FFReleaseURLForVentura,
-			Sha256Sum: define.FFMSha256ForVentura,
-			Prefix:    filepath.Join(stdioHome, define.HostShared, NAME, VERSION),
+			URL:       define.FF6ReleaseURL,
+			Sha256Sum: define.FF6Sha256,
+			Prefix:    filepath.Join(stdioHome, define.HostShared, define.FFMPEGPkgName, define.FFMPEG6Version),
 		},
 		Runner: define.RunOpts{
-			FFMPEGPath:  filepath.Join(stdioHome, define.HostShared, NAME, VERSION, define.FFMPEG),
-			FFPROBEPath: filepath.Join(stdioHome, define.HostShared, NAME, VERSION, define.FFPROBE),
+			FFMPEGPath:  filepath.Join(stdioHome, define.HostShared, define.FFMPEGPkgName, define.FFMPEG6Version, define.FFMPEGBin),
+			FFPROBEPath: filepath.Join(stdioHome, define.HostShared, define.FFMPEGPkgName, define.FFMPEG6Version, define.FFPROBEBin),
 		},
 	}
 }
+
+// func NewVersion7(s ssh.Session) *Stubber {
+//	stdioHome, err := utils.GetStudioHomeDir()
+//	if err != nil {
+//		logrus.Errorf("GetStudioHomeDir error: %v", err)
+//		return nil
+//	}
+//
+//	logrus.Infof("GetStudioHomeDir: %q", stdioHome)
+//
+//	return &Stubber{
+//		Session: s,
+//		Version: define.Version{
+//			PkgName: define.FFMPEGPkgName,
+//			PkgVer:  define.FFMPEG7Version,
+//		},
+//		Installer: define.InstallOpts{
+//			URL:       define.FF7ReleaseURL,
+//			Sha256Sum: define.FF7Sha256,
+//			Prefix:    filepath.Join(stdioHome, define.HostShared, define.FFMPEGPkgName, define.FFMPEG7Version),
+//		},
+//		Runner: define.RunOpts{
+//			FFMPEGPath:  filepath.Join(stdioHome, define.HostShared, define.FFMPEGPkgName, define.FFMPEG7Version, define.FFMPEGBin),
+//			FFPROBEPath: filepath.Join(stdioHome, define.HostShared, define.FFMPEGPkgName, define.FFMPEG7Version, define.FFPROBEBin),
+//		},
+//	}
+//}
 
 func (l *Stubber) Run(ctx context.Context, target string, args, envs []string) error {
 	l.Runner.Args = args
@@ -62,7 +86,7 @@ func (l *Stubber) Run(ctx context.Context, target string, args, envs []string) e
 
 	cmd := exec.CommandContext(ctx, l.Runner.FFMPEGPath, l.Runner.Args...)
 
-	if target == define.FFPROBE {
+	if target == define.FFPROBEBin {
 		cmd = exec.CommandContext(ctx, l.Runner.FFPROBEPath, l.Runner.Args...)
 	}
 

@@ -32,8 +32,8 @@ func Infof(s ssh.Session, f string, v ...interface{}) {
 func SetupLogger() error {
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp:   true,
-		ForceColors:     true,
-		DisableColors:   false,
+		ForceColors:     false,
+		DisableColors:   true,
 		TimestampFormat: "2006-01-02 15:04:05.000",
 	})
 	homeDir, err := os.UserHomeDir()
