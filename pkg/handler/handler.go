@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"github.com/sirupsen/logrus"
 	"sshd/pkg/define"
-	"sshd/pkg/logger"
+	slog "sshd/pkg/logger"
 
 	"github.com/gliderlabs/ssh"
-	"github.com/sirupsen/logrus"
 )
 
 type Middleware func(next ssh.Handler) ssh.Handler
@@ -28,13 +28,13 @@ func WithMiddleware(mw ...Middleware) ssh.Option {
 
 func ValidateCmdline(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
-		logrus.Infof("run middleware Sanitizers")
+		logrus.Infof("run middleware Sanitizers\n")
 		// Parameter parsing follows the openssh standard implementation
 		// https://stackoverflow.com/questions/53465980/how-to-keep-parameter-with-spaces-when-running-remote-script-file-with-ssh
-		logrus.Infof("Validate string: %q", s.Command())
+		logrus.Infof("Validate string: %q\n", s.Command())
 		str := s.Command()
 		if len(str) == 0 {
-			logger.Fatalf(s, "Empty command, Support commands: %q", define.Whitelist)
+			slog.Fatalf(s, "Empty command, Support commands: %q \r\n", define.Whitelist)
 			return
 		}
 
@@ -42,7 +42,7 @@ func ValidateCmdline(next ssh.Handler) ssh.Handler {
 		if define.IsWhitelisted(str[0]) {
 			next(s)
 		} else {
-			logger.Fatalf(s, "Command %q not allowed, Support commands: %q\n", str[0], define.Whitelist)
+			slog.Fatalf(s, "Command %q not allowed, Support commands: %q \r\n", str[0], define.Whitelist)
 			return
 		}
 	}
