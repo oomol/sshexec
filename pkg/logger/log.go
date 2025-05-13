@@ -26,7 +26,7 @@ func Errorf(s ssh.Session, f string, v ...interface{}) {
 
 func Infof(s ssh.Session, f string, v ...interface{}) {
 	logrus.Infof(f, v...)
-	_, _ = fmt.Fprintf(s, f, v...)
+	_, _ = fmt.Fprintf(s.Stderr(), f, v...)
 }
 
 func SetupLogger() error {

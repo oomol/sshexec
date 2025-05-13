@@ -3,7 +3,7 @@ package ffmpeg
 import (
 	"sshd/pkg/define"
 	"sshd/pkg/exec"
-	"sshd/pkg/logger"
+	slog "sshd/pkg/logger"
 	"sshd/pkg/provider/ffmpeg"
 
 	"github.com/gliderlabs/ssh"
@@ -20,12 +20,12 @@ func Run(next ssh.Handler) ssh.Handler {
 			stubber := ffmpeg.New(s)
 			args, err := exec.DoArgsSanitizers(s.Command()[1:])
 			if err != nil {
-				logger.Fatalf(s, "DoArgsSanitizers error: %v", err)
+				slog.Fatalf(s, "DoArgsSanitizers error: %v\r\n", err)
 				return
 			}
 
 			if err = stubber.Run(s.Context(), targetBin, args, nil); err != nil {
-				logger.Fatalf(s, "Run with error: %v", err)
+				slog.Fatalf(s, "Run with error: %v\r\n", err)
 				return
 			}
 		}
@@ -41,37 +41,37 @@ func Install(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
 		// if the command is not define.InstallFFMPEG, do nothing and run next handler
 		if s.Command()[0] == define.InstallFFMPEG {
-			logrus.Infof("run middleware: %q", InstallStage)
+			slog.Infof(s, "run middleware: %q", InstallStage)
 			stubber := ffmpeg.New(s)
 			if err := stubber.Download(s.Context()); err != nil {
-				logger.Fatalf(s, "Download ffmpeg error: %v", err)
+				slog.Fatalf(s, "Download ffmpeg error: %v\r\n", err)
 				return
 			}
-			logger.Infof(s, "Download ffmpeg success\n")
+			slog.Infof(s, "Download ffmpeg success\r\n")
 
 			if err := stubber.Unpack(s.Context()); err != nil {
-				logger.Fatalf(s, "Unpack ffmpeg error: %v", err)
+				slog.Fatalf(s, "Unpack ffmpeg error: %v\r\n", err)
 				return
 			}
-			logger.Infof(s, "Unpack ffmpeg success\n")
+			slog.Infof(s, "Unpack ffmpeg success\r\n")
 
 			if err := stubber.Setup(s.Context()); err != nil {
-				logger.Fatalf(s, "Setup ffmpeg error: %v", err)
+				slog.Fatalf(s, "Setup ffmpeg error: %v", err)
 				return
 			}
-			logger.Infof(s, "Setup ffmpeg success\n")
+			slog.Infof(s, "Setup ffmpeg success\r\n")
 
 			if err := stubber.Test(s.Context()); err != nil {
-				logger.Fatalf(s, "Test ffmpeg package error: %v", err)
+				slog.Fatalf(s, "Test ffmpeg package error: %v\r\n", err)
 				return
 			}
-			logger.Infof(s, "Test ffmpeg package success\n")
+			slog.Infof(s, "Test ffmpeg package success\r\n")
 
 			if err := stubber.CleanUp(s.Context()); err != nil {
-				logger.Fatalf(s, "Clean up ffmpeg error: %v", err)
+				slog.Fatalf(s, "Clean up ffmpeg error: %v\r\n", err)
 				return
 			}
-			logger.Infof(s, "Clean up ffmpeg success\n")
+			slog.Infof(s, "Clean up ffmpeg success\r\n")
 		}
 
 		// next handler if no error

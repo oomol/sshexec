@@ -145,7 +145,6 @@ func (l *Stubber) Setup(ctx context.Context) error {
 
 func (l *Stubber) Test(ctx context.Context) error {
 	if err := exec.CommandContext(ctx, l.Runner.FFMPEGPath, "-version").Start(); err != nil {
-		// TODO: we should report the error into ssh session in caller
 		return fmt.Errorf("test ffmpeg failed: %w", err)
 	}
 
@@ -171,6 +170,7 @@ func (l *Stubber) Download(ctx context.Context) error {
 	pGet := pget.New()
 	if err = pGet.Run(ctx, "1.0", []string{
 		"-p", "4",
+		"--timeout", "160",
 		"-o", outFile,
 		l.Installer.URL,
 	}); err != nil {
