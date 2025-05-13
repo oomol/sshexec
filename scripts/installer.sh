@@ -48,16 +48,7 @@ get_platform() {
 
 # Setup ffmpeg binaries logic
 setup_ffmpeg_for_macos_aarch64() {
-	caller_script="/usr/bin/caller.sh"
-	wget https://github.com/oomol/sshexec/raw/refs/heads/main/scripts/caller.sh --output-document "$caller_script"
-	chmod +x "$caller_script"
-
-	ln -sf "$caller_script" /usr/bin/install_ffmpeg # used to install_ffmpeg
-	/usr/bin/install_ffmpeg # do install ffmpeg
-
-	# Link caller.sh to <binary_name>
-	ln -sf "$caller_script" /usr/bin/ffmpeg
-	ln -sf "$caller_script" /usr/bin/ffprobe
+  echo "skip"
 }
 
 setup_ffmpeg_for_wsl2_x86_64() {

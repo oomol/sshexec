@@ -7,13 +7,16 @@ BINARY_NAME=sshexec
 # All target
 all: build
 
-build: build-arm64 build-amd64 script
+build: build-arm64 build-amd64
 
 build-arm64:
 	GOARCH=arm64 $(GOBUILD) -o out/$(BINARY_NAME)-arm64 -v sshd/cmd/
+	GOOS=linux GOARCH=arm64 $(GOBUILD) -o out/caller-arm64 -v scripts/caller.go
+
 
 build-amd64:
 	GOARCH=amd64 $(GOBUILD) -o out/$(BINARY_NAME)-amd64 -v  sshd/cmd/
+	GOOS=linux GOARCH=amd64 $(GOBUILD) -o out/caller-amd64 -v scripts/caller.go
 
 lint:
 	golangci-lint run
@@ -22,13 +25,6 @@ lint:
 clean:
 	$(GOCLEAN)
 	rm -f $(BINARY_NAME)
-
-# Format the code
-script:
-	cp scripts/caller.sh out/
-	chmod +x out/caller.sh
-	cp scripts/installer.sh out/
-	chmod +x out/installer.sh
 
 fmt:
 	$(GOCMD) fmt ./...

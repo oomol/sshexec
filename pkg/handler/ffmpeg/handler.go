@@ -16,7 +16,7 @@ func Run(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
 		targetBin := s.Command()[0]
 		if targetBin == define.FFPROBEBin || targetBin == define.FFMPEGBin {
-			logrus.Infof("run middleware: %q\r\n", RunFFMPEGStage)
+			logrus.Infof("run middleware: %q\n", RunFFMPEGStage)
 			stubber := ffmpeg.NewVersion6(s)
 			args, err := exec.DoArgsSanitizers(s.Command()[1:])
 			if err != nil {

@@ -33,7 +33,7 @@ func SetupLogger() error {
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp:   true,
 		ForceColors:     false,
-		DisableColors:   true,
+		DisableColors:   false,
 		TimestampFormat: "2006-01-02 15:04:05.000",
 	})
 	homeDir, err := os.UserHomeDir()
