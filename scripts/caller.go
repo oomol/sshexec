@@ -20,7 +20,7 @@ func init() {
 }
 
 const (
-	addr     = "127.0.0.1"
+	addr     = "192.168.127.254"
 	user     = "oomol"
 	port     = "5322"
 	endpoint = user + "@" + addr

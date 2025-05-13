@@ -46,11 +46,12 @@ get_platform() {
   fi
 }
 
-# Setup ffmpeg binaries logic
 setup_ffmpeg_for_macos_aarch64() {
   wget https://github.com/oomol/sshexec/releases/download/v1.0.6/caller-arm64 --output-document=/usr/bin/caller
   ln -sf /usr/bin/caller /usr/bin/ffmpeg
   ln -sf /usr/bin/caller /usr/bin/ffprobe
+  ln -sf /usr/bin/caller /usr/bin/install_ffmpeg_6
+  /usr/bin/install_ffmpeg_6
 }
 
 setup_ffmpeg_for_wsl2_x86_64() {
