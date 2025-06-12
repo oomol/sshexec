@@ -46,6 +46,7 @@ jobs:
           files: |
             out/sshexec*
             out/caller*
+            out/installer.sh
           append_body: true
           draft: false
           prerelease: false

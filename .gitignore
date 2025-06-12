@@ -2,3 +2,4 @@ sshd
 sshexec
 out/**
 .idea/**
+.DS_Store

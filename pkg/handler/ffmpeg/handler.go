@@ -85,6 +85,7 @@ func Install(next ssh.Handler) ssh.Handler {
 				return
 			}
 			slog.Infof(s, "Clean up ffmpeg success\r\n")
+			return
 		}
 
 		// next handler if no error

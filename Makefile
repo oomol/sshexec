@@ -8,6 +8,7 @@ BINARY_NAME=sshexec
 all: build
 
 build: build-arm64 build-amd64
+	cp -v scripts/installer.sh out/installer.sh
 
 build-arm64:
 	GOARCH=arm64 $(GOBUILD) -o out/$(BINARY_NAME)-arm64 -v sshd/cmd/
