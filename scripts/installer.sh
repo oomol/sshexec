@@ -2,28 +2,12 @@
 set -e
 set -u
 
-log() {
-  msg="LOG: $S_NAME> $*"
-  echo "$(date +'%Y-%m-%dT%H:%M:%S.%3N%z'):" "$msg" >&2
-}
-
-err() {
-  msg="ERROR: $S_NAME> $*"
-  echo "$(date +'%Y-%m-%dT%H:%M:%S.%3N%z'):" "$msg" >&2
-  exit 100
-}
-
-warn() {
-  msg="WARN: $S_NAME> $*"
-  echo "$(date +'%Y-%m-%dT%H:%M:%S.%3N%z'):" "$msg" >&2
-}
-
 get_platform() {
   arch=$(uname -m)
   platform=unknown
 
   if [[ -z "$arch" ]]; then
-    warn "uname -m return empty"
+    echo "uname -m return empty"
     return
   fi
 
@@ -70,14 +54,16 @@ setup_ffmpeg() {
   elif [[ "$platform" == wsl2-x86_64 ]]; then
     setup_ffmpeg_for_wsl2_x86_64
   else
-    err "unsupport platform: $platform"
+    echo "unsupport platform: $platform"
+    exit 100
   fi
 }
 
 main() {
   get_platform
   if [[ "$platform" == "unknown" ]]; then
-    err "unknown platform"
+    echo "unknown platform"
+    exit 100
   fi
   setup_ffmpeg
 }
