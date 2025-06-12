@@ -5,6 +5,7 @@ import (
 	"sshd/pkg/exec"
 	slog "sshd/pkg/logger"
 	"sshd/pkg/provider/ffmpeg"
+	"sync"
 
 	"github.com/gliderlabs/ssh"
 	"github.com/sirupsen/logrus"
@@ -37,12 +38,23 @@ func Run(next ssh.Handler) ssh.Handler {
 
 const InstallStage = "ffmpeg install handler"
 
+var lock sync.Mutex
+
 func Install(next ssh.Handler) ssh.Handler {
 	return func(s ssh.Session) {
 		// if the command is not InstallFFMPEGVersion6, do nothing and run the next handler
 		if s.Command()[0] == define.InstallFFMPEGVersion6 {
+			lock.Lock()
+			defer lock.Unlock()
+
 			slog.Infof(s, "run middleware: %q\r\n", InstallStage)
 			stubber := ffmpeg.NewVersion6(s)
+
+			// we first test the ffmpeg call be called, if ffmpeg can be called without error, just return
+			if err := stubber.Test(s.Context()); err == nil {
+				slog.Infof(s, "ffmpeg package installed before\r\n")
+				return
+			}
 
 			if err := stubber.Download(s.Context()); err != nil {
 				slog.Fatalf(s, "Download ffmpeg error: %v\r\n", err)
