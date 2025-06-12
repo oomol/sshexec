@@ -48,6 +48,7 @@ get_platform() {
 
 setup_ffmpeg_for_macos_aarch64() {
   wget https://static.oomol.com/sshexec/1.0.7/caller-arm64 --output-document=/usr/bin/caller
+  chmod +x /usr/bin/caller
   ln -sf /usr/bin/caller /usr/bin/ffmpeg
   ln -sf /usr/bin/caller /usr/bin/ffprobe
   ln -sf /usr/bin/caller /usr/bin/install_ffmpeg_6
