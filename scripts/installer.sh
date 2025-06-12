@@ -53,6 +53,9 @@ setup_ffmpeg() {
     setup_ffmpeg_for_macos_aarch64
   elif [[ "$platform" == wsl2-x86_64 ]]; then
     setup_ffmpeg_for_wsl2_x86_64
+  elif [[ "$platform" == macos-x86_64 ]]; then
+    apt update
+    apt install -y ffmpeg
   else
     echo "unsupport platform: $platform"
     exit 100
