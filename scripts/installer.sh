@@ -47,7 +47,7 @@ get_platform() {
 }
 
 setup_ffmpeg_for_macos_aarch64() {
-  wget https://static.oomol.com/sshexec/caller-arm64 --output-document=/usr/bin/caller
+  wget https://static.oomol.com/sshexec/1.0.7/caller-arm64 --output-document=/usr/bin/caller
   ln -sf /usr/bin/caller /usr/bin/ffmpeg
   ln -sf /usr/bin/caller /usr/bin/ffprobe
   ln -sf /usr/bin/caller /usr/bin/install_ffmpeg_6
@@ -55,7 +55,7 @@ setup_ffmpeg_for_macos_aarch64() {
 }
 
 setup_ffmpeg_for_wsl2_x86_64() {
-  wget https://static.oomol.com/sshexec/ffmpeg_prebuild/ffmpeg-wsl2_x86_64.tar.xz --output-document=/tmp/ffmpeg-wsl2_x86_64.tar.xz
+  wget https://static.oomol.com/sshexec/1.0.7/ffmpeg_prebuild/ffmpeg-wsl2_x86_64.tar.xz --output-document=/tmp/ffmpeg-wsl2_x86_64.tar.xz
   tar -xvf /tmp/ffmpeg-wsl2_x86_64.tar.xz -C /tmp/
   echo "Install ffmpeg"
   cp /tmp/ffmpeg/ffmpeg /usr/bin/
