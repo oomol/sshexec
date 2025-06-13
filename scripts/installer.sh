@@ -54,6 +54,10 @@ setup_ffmpeg() {
   elif [[ "$platform" == wsl2-x86_64 ]]; then
     setup_ffmpeg_for_wsl2_x86_64
   elif [[ "$platform" == macos-x86_64 ]]; then
+    rm -f /var/lib/dpkg/lock
+    rm -f /var/lib/apt/lists/lock
+    rm -f /var/lib/dpkg/lock-frontend
+    rm -f rm /var/cache/apt/archives/lock
     apt update
     apt install -y ffmpeg
   else
