@@ -64,8 +64,8 @@ func start(ctx context.Context, command *cli.Command) error {
 			errChan <- ssh.ListenAndServe(command.String(listen), nil, handler.WithMiddleware(
 				ffmpeg.Run,
 				ffmpeg.Install,
-				handler.ValidateCmdline,
 				handler.ShowVersion,
+				handler.ValidateCmdline,
 			))
 		}()
 
