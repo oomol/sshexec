@@ -48,3 +48,13 @@ func ValidateCmdline(next ssh.Handler) ssh.Handler {
 		}
 	}
 }
+
+func ShowVersion(next ssh.Handler) ssh.Handler {
+	return func(s ssh.Session) {
+		if s.Command()[0] == define.ShowCurrentVersion {
+			slog.Printf(s, "%s\r\n", define.CurrentVersion)
+			return
+		}
+		next(s)
+	}
+}

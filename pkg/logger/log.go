@@ -29,6 +29,11 @@ func Infof(s ssh.Session, f string, v ...interface{}) {
 	_, _ = fmt.Fprintf(s.Stderr(), f, v...)
 }
 
+func Printf(s ssh.Session, f string, v ...interface{}) {
+	logrus.Infof(f, v...)
+	_, _ = fmt.Fprintf(s, f, v...)
+}
+
 func SetupLogger() error {
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp:   true,

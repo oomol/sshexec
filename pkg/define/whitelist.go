@@ -4,6 +4,7 @@ var Whitelist = []string{
 	FFPROBEBin,
 	FFMPEGBin,
 	InstallFFMPEGVersion6,
+	ShowCurrentVersion,
 }
 
 func IsWhitelisted(command string) bool {

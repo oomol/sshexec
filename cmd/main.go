@@ -65,6 +65,7 @@ func start(ctx context.Context, command *cli.Command) error {
 				ffmpeg.Run,
 				ffmpeg.Install,
 				handler.ValidateCmdline,
+				handler.ShowVersion,
 			))
 		}()
 
