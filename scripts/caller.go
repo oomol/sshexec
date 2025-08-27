@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -38,6 +39,7 @@ func main() {
 		argsBuilder.WriteString(str)
 		argsBuilder.WriteString(" ")
 	}
+
 	fullFFMPEGArgString := argsBuilder.String()
 	_, _ = fmt.Fprintf(os.Stderr, "ffmpeg cmdline: %q\n", fullFFMPEGArgString)
 
@@ -50,8 +52,11 @@ func main() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
+
 	_, _ = fmt.Fprintf(os.Stderr, "full cmdline: %q\n", cmd.Args)
-	if err := cmd.Run(); err != nil {
+
+	err := cmd.Run()
+	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%v", err)
 	}
 }

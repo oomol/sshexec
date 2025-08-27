@@ -113,14 +113,18 @@ func (l *Stubber) Run(ctx context.Context, target string, args, envs []string) e
 	// Copy cmd stdout to ssh session
 	go func() {
 		_, _ = io.Copy(l.Session, stdOut)
+
 		logrus.Infof("Copy cmd stdout to ssh session's stdout finished")
+
 		_ = stdOut.Close()
 	}()
 
 	// Copy cmd stderr to ssh session's stderr
 	go func() {
 		_, _ = io.Copy(l.Session.Stderr(), stdErr)
+
 		logrus.Infof("Copy cmd stderr to ssh session's stderr finished")
+
 		_ = stdErr.Close()
 	}()
 
@@ -130,7 +134,9 @@ func (l *Stubber) Run(ctx context.Context, target string, args, envs []string) e
 		if err != nil {
 			logrus.Errorf("io.Copy(stdIn, l.Session) error: %v", err)
 		}
+
 		logrus.Infof("Copy stdin from session to cmd stdin finished")
+
 		_ = stdIn.Close()
 	}()
 
@@ -151,6 +157,7 @@ func (l *Stubber) Setup(ctx context.Context) error {
 	if err := os.Chmod(l.Runner.FFMPEGPath, 0755); err != nil {
 		return fmt.Errorf("chmod ffmpeg failed: %w", err)
 	}
+
 	if err := os.Chmod(l.Runner.FFPROBEPath, 0755); err != nil {
 		return fmt.Errorf("chmod ffprobe failed: %w", err)
 	}

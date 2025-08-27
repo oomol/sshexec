@@ -26,9 +26,9 @@ func Unarchive(tarball, dst string) error {
 	}
 	defer archiveFile.Close()
 
-	format, input, identifyErr := archives.Identify(context.Background(), tarball, archiveFile)
-	if identifyErr != nil {
-		return fmt.Errorf("identify format: %w", identifyErr)
+	format, input, err := archives.Identify(context.Background(), tarball, archiveFile)
+	if err != nil {
+		return fmt.Errorf("identify format: %w", err)
 	}
 
 	extractor, ok := format.(archives.Extractor)
@@ -36,25 +36,27 @@ func Unarchive(tarball, dst string) error {
 		return fmt.Errorf("unsupported format for extraction")
 	}
 
-	if dirErr := createDirWithPermissions(dst, dirPermissions); dirErr != nil {
-		return fmt.Errorf("creating destination directory: %w", dirErr)
+	if err := createDirWithPermissions(dst, dirPermissions); err != nil {
+		return fmt.Errorf("creating destination directory: %w", err)
 	}
 
 	handler := func(ctx context.Context, f archives.FileInfo) error {
 		return handleFile(f, dst)
 	}
 
-	if extractErr := extractor.Extract(context.Background(), input, handler); extractErr != nil {
-		return fmt.Errorf("extracting files: %w", extractErr)
+	if err := extractor.Extract(context.Background(), input, handler); err != nil {
+		return fmt.Errorf("extracting files: %w", err)
 	}
 
 	return nil
 }
 
 func createDirWithPermissions(path string, mode os.FileMode) error {
-	if err := os.MkdirAll(path, mode); err != nil {
+	err := os.MkdirAll(path, mode)
+	if err != nil {
 		return fmt.Errorf("mkdir: %w", err)
 	}
+
 	return nil
 }
 
@@ -68,6 +70,7 @@ func securePath(basePath, relativePath string) (string, error) {
 	if !strings.HasPrefix(filepath.Clean(dstPath)+string(os.PathSeparator), filepath.Clean(basePath)+string(os.PathSeparator)) {
 		return "", fmt.Errorf("illegal file path: %s", dstPath)
 	}
+
 	return dstPath, nil
 }
 
@@ -80,16 +83,20 @@ func handleFile(f archives.FileInfo, dst string) error {
 
 	// Ensure the parent directory exists
 	parentDir := filepath.Dir(dstPath)
-	if dirErr := createDirWithPermissions(parentDir, dirPermissions); dirErr != nil {
+
+	dirErr := createDirWithPermissions(parentDir, dirPermissions)
+	if dirErr != nil {
 		return dirErr
 	}
 
 	// Handle directories
 	if f.IsDir() {
 		// Create the directory with permissions from the archive
-		if dirErr := createDirWithPermissions(dstPath, f.Mode()); dirErr != nil {
+		dirErr := createDirWithPermissions(dstPath, f.Mode())
+		if dirErr != nil {
 			return fmt.Errorf("creating directory: %w", dirErr)
 		}
+
 		return nil
 	}
 
@@ -99,7 +106,9 @@ func handleFile(f archives.FileInfo, dst string) error {
 			logrus.Warnf("Ignoring symlink: %s -> %s", f.NameInArchive, f.LinkTarget)
 			return nil
 		}
-		if linkErr := os.Symlink(f.LinkTarget, dstPath); linkErr != nil {
+
+		linkErr := os.Symlink(f.LinkTarget, dstPath)
+		if linkErr != nil {
 			return fmt.Errorf("creating symlink: %w", linkErr)
 		}
 	}
@@ -112,12 +121,15 @@ func handleFile(f archives.FileInfo, dst string) error {
 
 	// If parent directory is read-only, temporarily make it writable
 	if originalMode.Mode().Perm()&0o200 == 0 {
-		if chmodErr := os.Chmod(parentDir, originalMode.Mode()|0o200); chmodErr != nil {
+		chmodErr := os.Chmod(parentDir, originalMode.Mode()|0o200)
+		if chmodErr != nil {
 			return fmt.Errorf("chmod parent directory: %w", chmodErr)
 		}
+
 		defer func() {
 			// Restore the original permissions after writing
-			if chmodErr := os.Chmod(parentDir, originalMode.Mode()); chmodErr != nil {
+			chmodErr := os.Chmod(parentDir, originalMode.Mode())
+			if chmodErr != nil {
 				logrus.Warnf("Failed to restore original permissions for %s: %v", parentDir, chmodErr)
 			}
 		}()

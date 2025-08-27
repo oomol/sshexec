@@ -13,5 +13,6 @@ func IsWhitelisted(command string) bool {
 			return true
 		}
 	}
+
 	return false
 }

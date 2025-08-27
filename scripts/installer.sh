@@ -1,39 +1,114 @@
 #! /usr/bin/env bash
+set -e
+
+RED="\033[31m"
+YELLOW="\033[33m"
+GREEN="\033[32m"
+RESET="\033[0m"
+
+log_err() {
+	echo -e "${RED}[ERROR]${RESET} $*" >&2
+	exit 100
+}
+
+log_warn() {
+	echo -e "${YELLOW}[WARN]${RESET} $*" >&2
+}
+
+log_std() {
+	echo -e "${GREEN}[INFO]${RESET} $*"
+}
+
+sshexec_version="unknown"
+
 get_platform() {
 	arch=$(uname -m)
 	platform=unknown
+	log_std "get sshexec version..."
+	sshexec_version="$(ssh -o StrictHostKeyChecking=no -q root@192.168.127.254 -p5322 show_version | xargs | tr -d '\r' | tr -d '\n')"
+	log_std "sshexec_version: $sshexec_version"
 
 	if [[ -z "$arch" ]]; then
-		echo "uname -m return empty"
+		log_err "uname -m return empty"
+	fi
+
+	# For linux arm64
+	if [[ "$arch" == aarch64 ]] || [[ $arch == arm64 ]] && [[ $OO_HOST_PLATFORM == "linux" ]]; then
+		platform="linux_arm64"
 		return
 	fi
 
-	# For wsl2
-	if [[ "$arch" == x86_64 ]] && [[ -d "/usr/lib/wsl" ]]; then
-		platform="wsl2-$arch"
+	# For linux x86_64
+	if [[ "$arch" == x86_64 ]] || [[ "$arch" == amd64 ]] && [[ $OO_HOST_PLATFORM == "linux" ]]; then
+		platform="linux_amd64"
+		return
+	fi
+
+	# For wsl2 amd64
+	if [[ "$arch" == x86_64 ]] || [[ "$arch" == amd64 ]] && [[ $OO_HOST_PLATFORM == "win32" ]]; then
+		platform="wsl2_amd64"
 		return
 	fi
 
 	# For MacOS-x86_64
-	if [[ "$arch" == x86_64 ]]; then
-		platform="macos-$arch"
+	if [[ "$arch" == x86_64 ]] || [[ "$arch" == amd64 ]] && [[ $OO_HOST_PLATFORM == "darwin" ]]; then
+		platform="macos_amd64"
 		return
 	fi
 
 	# For MacOS-aarch64
-	if [[ "$arch" == aarch64 ]] || [[ $arch == arm64 ]]; then
-		platform="macos-$arch"
+	if [[ "$arch" == aarch64 ]] || [[ $arch == arm64 ]] && [[ $OO_HOST_PLATFORM == "darwin" ]]; then
+		platform="macos_arm64"
 		return
 	fi
 }
 
-get_ver() {
-	sshexec_version="$(ssh -o StrictHostKeyChecking=no -q root@192.168.127.254 -p5322 show_version | xargs)"
+# Fallback to install native ffmpeg
+install_native_ffmpeg_linux() {
+	if ffmpeg -version; then
+	  log_std "ffmpeg installed before"
+	  return
+	fi
+
+	if [[ "$platform" == "linux_arm64" ]] || [[ "$platform" == "macos_arm64" ]] || [[ "$platform" == "wsl2_arm64" ]]; then
+		log_std "Install ffmpeg for linux-arm64"
+		local url="https://static.oomol.com/sshexec/v1.0.11/jellyfin-ffmpeg_6.0.1-8_portable_linuxarm64-gpl.tar.xz"
+		local ffmpeg_tar="/tmp/$(basename "$url")"
+		wget "$url" --output-document="$ffmpeg_tar"
+		tar -xvf "$ffmpeg_tar" -C /usr/bin/
+		chmod +x /usr/bin/ffmpeg
+		chmod +x /usr/bin/ffprobe
+		log_std "Install ffmpeg for linux-arm64 done"
+	elif [[ "$platform" == "linux_amd64" ]] || [[ "$platform" == "macos_amd64" ]] || [[ "$platform" == "wsl2_amd64" ]]; then
+		log_std "Install ffmpeg for linux-amd64"
+		local url="https://static.oomol.com/sshexec/v1.0.11/jellyfin-ffmpeg_6.0.1-8_portable_linux64-gpl.tar.xz"
+		local ffmpeg_tar="/tmp/$(basename "$url")"
+		wget "$url" --output-document="$ffmpeg_tar"
+		tar -xvf "$ffmpeg_tar" -C /usr/bin/
+		chmod +x /usr/bin/ffmpeg
+		chmod +x /usr/bin/ffprobe
+		log_std "Install ffmpeg for linux-amd64 done"
+	else
+		log_err "platform not support"
+	fi
 }
 
-############ START OF MACOS ARM64 ############
-install_ffmpeg_arm64_v1.0.11() {
-	wget https://static.oomol.com/sshexec/v1.0.11/caller-arm64 --output-document=/usr/bin/caller
+# Install the Linux version of ffmpeg in compatibility mode
+setup_macos_compat() {
+	log_std "Install the Linux version of ffmpeg in compatibility mode"
+	install_native_ffmpeg_linux
+}
+
+# Use caller to install ffmpeg on the macOS host, and use caller to call ffmpeg on the macOS host from the container
+setup_macos_host_v1dot0() {
+	if [[ "$platform" == "macos_arm64" ]]; then
+		caller_name=caller-arm64
+	elif [[ "$platform" == "macos_amd64" ]]; then
+		caller_name=caller-amd64
+	fi
+
+	log_std "Download caller version: $sshexec_version"
+	wget "https://static.oomol.com/sshexec/$sshexec_version/$caller_name" --output-document "/usr/bin/caller"
 	chmod +x /usr/bin/caller
 	ln -sf /usr/bin/caller /usr/bin/ffmpeg
 	ln -sf /usr/bin/caller /usr/bin/ffprobe
@@ -41,85 +116,38 @@ install_ffmpeg_arm64_v1.0.11() {
 	/usr/bin/install_ffmpeg_6
 }
 
-# macos arm64 sshexec(from stable version) support install ffmpeg into host and calling ffmpeg from host
-install_ffmpeg_arm64_old() {
-	install_ffmpeg_arm64_v1.0.11
+setup_wsl() {
+	install_native_ffmpeg_linux
 }
 
-setup-macos-arm64() {
-	get_ver
-	if [[ "$sshexec_version" == "v1.0.11"* ]]; then
-		install_ffmpeg_arm64_v1.0.11
+setup_macos() {
+	if [[ $sshexec_version == "v1.0"* ]]; then
+		log_std "setup_macos_host_v1dot0"
+		setup_macos_host_v1dot0
 	else
-		# macos arm64 sshexec(from stable version) support install ffmpeg into host and calling ffmpeg from host
-		install_ffmpeg_arm64_old
+		setup_macos_compat
 	fi
 }
 
-############ END OF MACOS ARM64 ############
-
-############ START OF MACOS AMD64 ############
-install_ffmpeg_amd64_v1.0.11() {
-	wget https://static.oomol.com/sshexec/v1.0.11/caller-amd64 --output-document=/usr/bin/caller
-	chmod +x /usr/bin/caller
-	ln -sf /usr/bin/caller /usr/bin/ffmpeg
-	ln -sf /usr/bin/caller /usr/bin/ffprobe
-	ln -sf /usr/bin/caller /usr/bin/install_ffmpeg_6
-	/usr/bin/install_ffmpeg_6
+setup_linux() {
+	install_native_ffmpeg_linux
 }
 
-install_ffmpeg_amd64_old() {
-	sudo apt update
-	sudo apt install -y ffmpeg
-}
-
-setup-macos-amd64() {
-	get_ver
-	if [[ "$sshexec_version" == "v1.0.11"* ]]; then
-		install_ffmpeg_amd64_v1.0.11
+setup() {
+	if [[ "$platform" == "macos_"* ]]; then
+		setup_macos
+	elif [[ "$platform" == "wsl2_"* ]]; then
+		setup_wsl
+	elif [[ "$platform" == "linux_"* ]]; then
+		setup_linux
 	else
-		# from sshexec v1.0.11 support install ffmpeg into host and calling ffmpeg from host
-		# For compatibility reasons, use apt to install ffmpeg as a fallback mechanism
-		install_ffmpeg_amd64_old
-	fi
-}
-
-############ END OF MACOS AMD64 ############
-
-############ START OF WSL2 AMD64 ############
-setup-wsl-amd64() {
-	echo "Install ffmpeg"
-	_ver=v1.0.11
-	ffmpeg_tar="/tmp/jellyfin-ffmpeg_6.0.1-8_portable_linux64-gpl.tar.xz"
-	wget https://static.oomol.com/sshexec/$_ver/jellyfin-ffmpeg_6.0.1-8_portable_linux64-gpl.tar.xz --output-document="$ffmpeg_tar"
-	tar -xvf "$ffmpeg_tar" -C /usr/bin/
-	chmod +x /usr/bin/ffmpeg
-	chmod +x /usr/bin/ffprobe
-	echo "Install ffmpeg done"
-}
-
-############ END OF WSL2 AMD64 ############
-
-setup_ffmpeg() {
-	if [[ "$platform" == macos-aarch64 ]]; then
-		setup-macos-arm64
-	elif [[ "$platform" == wsl2-x86_64 ]]; then
-		setup-wsl-amd64
-	elif [[ "$platform" == macos-x86_64 ]]; then
-		setup-macos-amd64
-	else
-		echo "unsupport platform: $platform"
-		exit 100
+		log_err "unsupport platform: $platform"
 	fi
 }
 
 main() {
 	get_platform
-	if [[ "$platform" == "unknown" ]]; then
-		echo "unknown platform"
-		exit 100
-	fi
-	setup_ffmpeg
+	setup
 }
 
 main

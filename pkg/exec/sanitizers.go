@@ -41,10 +41,12 @@ func loadJSON(path string) (*DataStruct, error) {
 	defer file.Close()
 
 	var data DataStruct
+
 	decoder := json.NewDecoder(file)
 	if err = decoder.Decode(&data); err != nil {
 		return nil, err
 	}
+
 	return &data, nil
 }
 
@@ -75,6 +77,7 @@ func ContainerPath2HostPath(arg string) (string, error) {
 		path := filepath.Join(homeDir, ooHomePrefix, ooSessions)
 		newArg := strings.Replace(arg, oomolSessions, path, 1)
 		logrus.Warnf("%q --> %q", arg, newArg)
+
 		return newArg, nil
 	}
 
@@ -83,10 +86,12 @@ func ContainerPath2HostPath(arg string) (string, error) {
 		path := filepath.Join(homeDir, ooStorage)
 		newArg := strings.Replace(arg, oomolStorage, path, 1)
 		logrus.Warnf("%q --> %q", arg, newArg)
+
 		return newArg, nil
 	}
 
 	logrus.Infof("Load MountPoint json file: %q", MyJSONFile)
+
 	jsonData, err := loadJSON(MyJSONFile)
 	if err != nil {
 		return "", fmt.Errorf("failed to load json file: %v", err)
@@ -99,21 +104,26 @@ func ContainerPath2HostPath(arg string) (string, error) {
 			if strings.Contains(arg, mountPoint.ContainerPath) {
 				newArg := strings.Replace(arg, mountPoint.ContainerPath, mountPoint.HostPath, 1)
 				logrus.Warnf("%q --> %q", arg, newArg)
+
 				return newArg, nil
 			}
 		}
 	}
+
 	return arg, nil
 }
 
 func DoArgsSanitizers(args []string) ([]string, error) {
 	newArgs := make([]string, 0)
+
 	for _, arg := range args {
 		singleArg, err := ContainerPath2HostPath(arg)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert container path to host path: %v", err)
 		}
+
 		newArgs = append(newArgs, singleArg)
 	}
+
 	return newArgs, nil
 }

@@ -12,6 +12,8 @@ func GetStudioHomeDir() (string, error) {
 	if err != nil {
 		return "", errors.New("failed to get user home directory")
 	}
+
 	d = filepath.Join(d, define.StudioDir)
+
 	return d, nil
 }

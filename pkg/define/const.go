@@ -1,7 +1,8 @@
 package define
 
 const (
-	CurrentVersion = "v1.0.11"
+	// CurrentVersion Major version
+	CurrentVersion = "v1.0.12"
 
 	FFMPEG6ForARM64PkgName    = "ffmpeg_macos_arm64"
 	FFMPEG6ForARM64Version    = "v6.0.1"

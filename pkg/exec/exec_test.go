@@ -28,10 +28,12 @@ const MyJSONData = `
 
 func TestExecPathCover(t *testing.T) {
 	p := filepath.Join("/tmp", "mount-point.json")
+
 	jsonFile, err := os.Create(p)
 	if err != nil {
 		logrus.Fatalf("Failed to create json file: %v", err)
 	}
+
 	_, _ = jsonFile.WriteString(MyJSONData)
 	MyJSONFile = p
 
@@ -39,10 +41,12 @@ func TestExecPathCover(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to get user home dir: %v", err)
 	}
+
 	path, err := ContainerPath2HostPath("test")
 	if err != nil {
 		t.Fatalf("ContainerPath2HostPath failed: %v", err)
 	}
+
 	if path != "test" {
 		t.Error("ContainerPath2HostPath failed")
 	}
@@ -51,6 +55,7 @@ func TestExecPathCover(t *testing.T) {
 	if err != nil {
 		t.Errorf("ContainerPath2HostPath failed: %v", err)
 	}
+
 	if path != filepath.Join(homeDir, ooStorage) {
 		t.Error("ContainerPath2HostPath failed")
 	}
@@ -59,6 +64,7 @@ func TestExecPathCover(t *testing.T) {
 	if err != nil {
 		t.Errorf("ContainerPath2HostPath failed: %v", err)
 	}
+
 	if path != filepath.Join(homeDir, ooHomePrefix, ooSessions) {
 		t.Error("ContainerPath2HostPath failed")
 	}
@@ -67,6 +73,7 @@ func TestExecPathCover(t *testing.T) {
 	if err != nil {
 		t.Errorf("ContainerPath2HostPath failed: %v", err)
 	}
+
 	if path != "/Users/localuser/Desktop" {
 		t.Error("ContainerPath2HostPath failed")
 	}
@@ -75,6 +82,7 @@ func TestExecPathCover(t *testing.T) {
 	if err != nil {
 		t.Errorf("ContainerPath2HostPath failed: %v", err)
 	}
+
 	if path != "/Users/localuser/Downloads" {
 		t.Error("ContainerPath2HostPath failed")
 	}
@@ -82,10 +90,12 @@ func TestExecPathCover(t *testing.T) {
 
 func TestExecPathCover2(t *testing.T) {
 	p := filepath.Join("/tmp", "mount-point.json")
+
 	jsonFile, err := os.Create(p)
 	if err != nil {
 		logrus.Fatalf("Failed to create json file: %v", err)
 	}
+
 	_, _ = jsonFile.WriteString(MyJSONData)
 	MyJSONFile = p
 
@@ -101,5 +111,6 @@ func TestExecPathCover2(t *testing.T) {
 	if err != nil {
 		return
 	}
+
 	t.Log(sanitizers)
 }

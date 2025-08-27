@@ -18,7 +18,9 @@ func Run(next ssh.Handler) ssh.Handler {
 		targetBin := s.Command()[0]
 		if targetBin == define.FFPROBEBin || targetBin == define.FFMPEGBin {
 			logrus.Infof("run middleware: %q\n", RunFFMPEGStage)
+
 			stubber := ffmpeg.NewVersion6(s)
+
 			args, err := exec.DoArgsSanitizers(s.Command()[1:])
 			if err != nil {
 				slog.Fatalf(s, "DoArgsSanitizers error: %v\r\n", err)
@@ -51,7 +53,8 @@ func Install(next ssh.Handler) ssh.Handler {
 			stubber := ffmpeg.NewVersion6(s)
 
 			// we first test the ffmpeg call be called, if ffmpeg can be called without error, just return
-			if err := stubber.Test(s.Context()); err == nil {
+			err := stubber.Test(s.Context())
+			if err == nil {
 				slog.Infof(s, "ffmpeg package installed before\r\n")
 				return
 			}
@@ -60,31 +63,37 @@ func Install(next ssh.Handler) ssh.Handler {
 				slog.Fatalf(s, "Download ffmpeg error: %v\r\n", err)
 				return
 			}
+
 			slog.Infof(s, "Download ffmpeg success\r\n")
 
 			if err := stubber.Unpack(s.Context()); err != nil {
 				slog.Fatalf(s, "Unpack ffmpeg error: %v\r\n", err)
 				return
 			}
+
 			slog.Infof(s, "Unpack ffmpeg success\r\n")
 
 			if err := stubber.Setup(s.Context()); err != nil {
 				slog.Fatalf(s, "Setup ffmpeg error: %v", err)
 				return
 			}
+
 			slog.Infof(s, "Setup ffmpeg success\r\n")
 
 			if err := stubber.Test(s.Context()); err != nil {
 				slog.Fatalf(s, "Test ffmpeg package error: %v\r\n", err)
 				return
 			}
+
 			slog.Infof(s, "Test ffmpeg package success\r\n")
 
 			if err := stubber.CleanUp(s.Context()); err != nil {
 				slog.Fatalf(s, "Clean up ffmpeg error: %v\r\n", err)
 				return
 			}
+
 			slog.Infof(s, "Clean up ffmpeg success\r\n")
+
 			return
 		}
 

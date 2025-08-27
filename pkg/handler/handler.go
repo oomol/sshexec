@@ -22,7 +22,9 @@ func WithMiddleware(mw ...Middleware) ssh.Option {
 		for _, m := range mw {
 			h = m(h)
 		}
+
 		s.Handler = h
+
 		return nil
 	}
 }
@@ -33,6 +35,7 @@ func ValidateCmdline(next ssh.Handler) ssh.Handler {
 		// Parameter parsing follows the openssh standard implementation
 		// https://stackoverflow.com/questions/53465980/how-to-keep-parameter-with-spaces-when-running-remote-script-file-with-ssh
 		logrus.Infof("Validate string: %q\n", s.Command())
+
 		str := s.Command()
 		if len(str) == 0 {
 			slog.Fatalf(s, "Empty command, Support commands: %q \r\n", define.Whitelist)
@@ -55,6 +58,7 @@ func ShowVersion(next ssh.Handler) ssh.Handler {
 			slog.Printf(s, "%s\r\n", define.CurrentVersion)
 			return
 		}
+
 		next(s)
 	}
 }

@@ -41,7 +41,8 @@ func main() {
 		Action: start,
 	}
 
-	if err := app.Run(context.Background(), os.Args); err != nil {
+	err := app.Run(context.Background(), os.Args)
+	if err != nil {
 		logrus.Fatal(err)
 	}
 }
@@ -59,8 +60,10 @@ func start(ctx context.Context, command *cli.Command) error {
 
 	g.Go(func() error {
 		errChan := make(chan error, 1)
+
 		go func() {
 			logrus.Infof("Start ssh server on %q", command.String(listen))
+
 			errChan <- ssh.ListenAndServe(command.String(listen), nil, handler.WithMiddleware(
 				ffmpeg.Run,
 				ffmpeg.Install,

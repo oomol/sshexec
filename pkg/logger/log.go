@@ -41,6 +41,7 @@ func SetupLogger() error {
 		DisableColors:   false,
 		TimestampFormat: "2006-01-02 15:04:05.000",
 	})
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return fmt.Errorf("failed to get user home directory: %w", err)
@@ -55,11 +56,13 @@ func SetupLogger() error {
 	logDir := filepath.Dir(logFile)
 
 	logrus.Infof("Try to make logDir dir: %q", logDir)
+
 	if err = os.MkdirAll(logDir, 0755); err != nil {
 		return fmt.Errorf("failed to create log directory %q: %v", logDir, err)
 	}
 
 	logrus.Infof("Try to open log file: %q", logFile)
+
 	fd, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("failed to open log file %q: %v", logFile, err)
@@ -67,5 +70,6 @@ func SetupLogger() error {
 
 	logrus.SetOutput(fd)
 	logrus.SetLevel(logrus.InfoLevel)
+
 	return nil
 }

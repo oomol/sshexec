@@ -20,13 +20,16 @@ func IsProcessAliveV4(pid int) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("failed to find process: %w", err)
 	}
+
 	running, err := proc.IsRunning()
 	if err != nil {
 		return false, fmt.Errorf("failed to check if process is running: %w", err)
 	}
+
 	if !running {
 		return false, fmt.Errorf("process %d not found", pid)
 	}
+
 	return true, nil
 }
 
@@ -37,6 +40,7 @@ func WatchPPID(g *errgroup.Group, ctx context.Context, parentPid int) {
 	g.Go(func() error {
 		ticker := time.NewTicker(tickerInterval)
 		defer ticker.Stop()
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -55,6 +59,7 @@ func ListenSignal(g *errgroup.Group, ctx context.Context) {
 	g.Go(func() error {
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
