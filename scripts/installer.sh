@@ -25,7 +25,7 @@ get_platform() {
 	arch=$(uname -m)
 	platform=unknown
 	log_std "get sshexec version..."
-	sshexec_version="$(ssh -o StrictHostKeyChecking=no -q root@192.168.127.254 -p5322 show_version | xargs | tr -d '\r' | tr -d '\n')"
+	sshexec_version="$(ssh -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -o StrictHostKeyChecking=no -q root@192.168.127.254 -p5322 show_version | xargs | tr -d '\r' | tr -d '\n')"
 	log_std "sshexec_version: $sshexec_version"
 
 	if [[ -z "$arch" ]]; then
