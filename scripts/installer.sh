@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-set -e
+set -o pipefail
 
 RED="\033[31m"
 YELLOW="\033[33m"
@@ -25,42 +25,33 @@ get_platform() {
 	arch=$(uname -m)
 	platform=unknown
 	log_std "get sshexec version..."
-	sshexec_version="$(ssh -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -o StrictHostKeyChecking=no -q root@192.168.127.254 -p5322 show_version | xargs | tr -d '\r' | tr -d '\n')"
+	sshexec_version="$(ssh -o ConnectTimeout=5 \
+	                      -o ServerAliveInterval=2 \
+	                      -o ServerAliveCountMax=2 \
+	                      -o StrictHostKeyChecking=no \
+	                      -q root@192.168.127.254 -p5322 show_version | xargs | tr -d '\r' | tr -d '\n')"
 	log_std "sshexec_version: $sshexec_version"
+
+
 
 	if [[ -z "$arch" ]]; then
 		log_err "uname -m return empty"
 	fi
 
-	# For linux arm64
-	if [[ "$arch" == aarch64 ]] || [[ $arch == arm64 ]] && [[ $OO_HOST_PLATFORM == "linux" ]]; then
-		platform="linux_arm64"
-		return
-	fi
-
-	# For linux x86_64
-	if [[ "$arch" == x86_64 ]] || [[ "$arch" == amd64 ]] && [[ $OO_HOST_PLATFORM == "linux" ]]; then
-		platform="linux_amd64"
-		return
-	fi
-
-	# For wsl2 amd64
-	if [[ "$arch" == x86_64 ]] || [[ "$arch" == amd64 ]] && [[ $OO_HOST_PLATFORM == "win32" ]]; then
-		platform="wsl2_amd64"
-		return
-	fi
-
-	# For MacOS-x86_64
-	if [[ "$arch" == x86_64 ]] || [[ "$arch" == amd64 ]] && [[ $OO_HOST_PLATFORM == "darwin" ]]; then
-		platform="macos_amd64"
-		return
-	fi
-
-	# For MacOS-aarch64
-	if [[ "$arch" == aarch64 ]] || [[ $arch == arm64 ]] && [[ $OO_HOST_PLATFORM == "darwin" ]]; then
-		platform="macos_arm64"
-		return
-	fi
+	case "$arch" in
+      aarch64|arm64)
+          platform="linux_arm64"
+          [[ "$OO_HOST_PLATFORM" == "darwin" ]] && platform="macos_arm64"
+          ;;
+      x86_64|amd64)
+          platform="linux_amd64"
+          [[ "$OO_HOST_PLATFORM" == "win32" ]] && platform="wsl2_amd64"
+          [[ "$OO_HOST_PLATFORM" == "darwin" ]] && platform="macos_amd64"
+          ;;
+      *)
+          log_err "unsupported architecture: $arch"
+          ;;
+  esac
 }
 
 # Fallback to install native ffmpeg
@@ -74,19 +65,36 @@ install_native_ffmpeg_linux() {
 		log_std "Install ffmpeg for linux-arm64"
 		local url="https://static.oomol.com/sshexec/v1.0.11/jellyfin-ffmpeg_6.0.1-8_portable_linuxarm64-gpl.tar.xz"
 		local ffmpeg_tar="/tmp/$(basename "$url")"
+
+		log_std "download ffmpeg"
 		wget "$url" --output-document="$ffmpeg_tar"
+
+		log_std "extract ffmpeg bins to /usr/bin"
 		tar -xvf "$ffmpeg_tar" -C /usr/bin/
+
+		log_std "chmod +x /usr/bin/{ffmpeg,ffprobe}"
 		chmod +x /usr/bin/ffmpeg
 		chmod +x /usr/bin/ffprobe
+
 		log_std "Install ffmpeg for linux-arm64 done"
 	elif [[ "$platform" == "linux_amd64" ]] || [[ "$platform" == "macos_amd64" ]] || [[ "$platform" == "wsl2_amd64" ]]; then
 		log_std "Install ffmpeg for linux-amd64"
+
 		local url="https://static.oomol.com/sshexec/v1.0.11/jellyfin-ffmpeg_6.0.1-8_portable_linux64-gpl.tar.xz"
 		local ffmpeg_tar="/tmp/$(basename "$url")"
+
+		log_std "download ffmpeg"
 		wget "$url" --output-document="$ffmpeg_tar"
+
+		log_std "extract ffmpeg bins to /usr/bin"
 		tar -xvf "$ffmpeg_tar" -C /usr/bin/
+
+		log_std "chmod +x /usr/bin/{ffmpeg,ffprobe}"
 		chmod +x /usr/bin/ffmpeg
 		chmod +x /usr/bin/ffprobe
+
+		/usr/bin/ffmpeg -version
+		
 		log_std "Install ffmpeg for linux-amd64 done"
 	else
 		log_err "platform not support"
@@ -110,9 +118,13 @@ setup_macos_host_v1dot0() {
 	log_std "Download caller version: $sshexec_version"
 	wget "https://static.oomol.com/sshexec/$sshexec_version/$caller_name" --output-document "/usr/bin/caller"
 	chmod +x /usr/bin/caller
+
+	log_std "create soft-link to /usr/bin/{ffmpeg,ffprobe,install_ffmpeg_6}"
 	ln -sf /usr/bin/caller /usr/bin/ffmpeg
 	ln -sf /usr/bin/caller /usr/bin/ffprobe
 	ln -sf /usr/bin/caller /usr/bin/install_ffmpeg_6
+
+	log_std "call /usr/bin/install_ffmpeg_6 to install ffmpeg for host"
 	/usr/bin/install_ffmpeg_6
 }
 
@@ -147,7 +159,11 @@ setup() {
 
 main() {
 	get_platform
+	set -e
+  set -o pipefail
 	setup
+	set +e
+  set +o pipefail
 }
 
 main
